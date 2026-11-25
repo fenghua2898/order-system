@@ -5,219 +5,200 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>球号订购系统</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
-body{background:#f5f5f5;color:#333;font-size:14px;padding-bottom:60px}
-.hd{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:16px;text-align:center;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-.hd h1{font-size:18px;font-weight:600}
-.wrap{max-width:480px;margin:0 auto;padding:12px}
-.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0}
-.row:last-child{border-bottom:none}
-.btn{display:block;width:100%;padding:12px;border:none;border-radius:8px;background:#667eea;color:#fff;font-size:15px;font-weight:500;cursor:pointer;margin-top:10px}
-.btn.green{background:#28a745}.btn.red{background:#dc3545}.btn.gray{background:#6c757d}
-input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px}
-textarea{min-height:80px;resize:vertical}
-.tabbar{position:fixed;bottom:0;left:0;right:0;height:56px;background:#fff;display:flex;justify-content:space-around;align-items:center;box-shadow:0 -2px 8px rgba(0,0,0,.05);z-index:20}
-.tabbar div{flex:1;text-align:center;font-size:12px;color:#888}
-.tabbar div.on{color:#667eea;font-weight:600}
-.tabbar .ic{font-size:20px;display:block;margin-bottom:2px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
-.ball{background:#fff;border:2px solid #eee;border-radius:50%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#333;cursor:pointer;transition:.2s}
-.ball.sel{background:#667eea;border-color:#667eea;color:#fff}
-.ball.sold{background:#e9ecef;color:#adb5bd;cursor:not-allowed}
-.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;background:#f0f0f0;margin-left:6px}
-.tag.ok{background:#d4edda;color:#155724}.tag.no{background:#f8d7da;color:#721c24}
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:99;opacity:0;transition:.3s}
-.toast.show{opacity:1}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
-.modal.on{display:flex}.mbox{background:#fff;border-radius:12px;padding:20px;width:100%;max-width:400px;max-height:80vh;overflow:auto}
-.mbox h3{margin-bottom:12px;font-size:17px}
-.close{float:right;cursor:pointer;color:#999;font-size:18px}
-.small{font-size:12px;color:#888}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+body{background:#f4f6fa;color:#222;padding-bottom:70px}
+.wrap{max-width:480px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #0001}
+.title{font-size:18px;font-weight:700;color:#4b3bbd;margin-bottom:10px}
+.sub{font-size:12px;color:#888;margin-bottom:8px}
+input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px;font-size:15px}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:8px}
+.btn.purple{background:linear-gradient(135deg,#6c5ce7,#a29bfe)}
+.btn.green{background:#27ae60}
+.btn.red{background:#e74c3c}
+.btn.gray{background:#bbb}
+.row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+.row:last-child{border:none}
+.tag{padding:2px 8px;border-radius:10px;background:#eee;font-size:12px}
+.tag.ok{background:#d4edda;color:#155724}
 .center{text-align:center}
-.qr img{max-width:180px;max-height:180px;margin:10px auto;display:block}
+.small{font-size:12px;color:#888}
+.balls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ball{padding:7px 0;border:1px solid #ddd;border-radius:8px;text-align:center;font-size:13px;cursor:pointer;background:#fff}
+.ball.on{background:#6c5ce7;color:#fff;border-color:#6c5ce7}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;padding:8px 0;z-index:10}
+.nav div{flex:1;text-align:center;font-size:12px;color:#888;cursor:pointer}
+.nav div.on{color:#6c5ce7;font-weight:700}
+.nav span{display:block;font-size:20px}
+#modal{display:none;position:fixed;inset:0;background:#0008;z-index:50;align-items:center;justify-content:center;padding:20px}
+#modal.on{display:flex}
+#mbox{background:#fff;width:100%;max-width:360px;border-radius:14px;padding:20px;position:relative}
+.close{position:absolute;right:12px;top:8px;font-size:22px;color:#999;cursor:pointer}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:8px;z-index:99;display:none;font-size:14px}
+#toast.show{display:block}
+.qtybox{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.qtybox button{width:36px;height:36px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:18px;cursor:pointer}
+.qtybox input{width:70px;text-align:center;margin:0}
 </style>
 </head>
 <body>
-<div class="hd"><h1>球号订购系统</h1></div>
 <div class="wrap">
-  <!-- 登录 -->
-  <div id="v-login" class="card">
-    <h3 style="margin-bottom:12px">账号登录</h3>
-    <input id="lg-acc" placeholder="账号">
-    <input id="lg-pwd" type="password" placeholder="密码">
-    <button class="btn" onclick="doLogin()">登录</button>
-    <button class="btn gray" onclick="showView('reg')">新用户注册</button>
-  </div>
-  <!-- 注册 -->
-  <div id="v-reg" class="card" style="display:none">
-    <h3 style="margin-bottom:12px">用户注册</h3>
-    <input id="rg-acc" placeholder="账号">
-    <input id="rg-pwd" type="password" placeholder="密码">
-    <input id="rg-nick" placeholder="昵称（选填）">
-    <button class="btn green" onclick="doReg()">注册</button>
-    <button class="btn gray" onclick="showView('login')">返回登录</button>
-  </div>
-  <!-- 选购 -->
-  <div id="v-buy" style="display:none">
-    <div class="card" id="ruleBox"></div>
-    <div class="card">
-      <h3 style="margin-bottom:8px">选择球号</h3>
-      <div class="small">已售：<span id="soldCnt">0</span> / 共 <span id="totCnt">0</span> 个</div>
-      <div class="grid" id="ballGrid"></div>
-      <div class="row"><span>已选：<b id="selTxt">无</b></span><span id="priceTxt"></span></div>
-      <button class="btn green" onclick="doOrder()" id="orderBtn">确认下单</button>
-    </div>
-  </div>
-  <!-- 我的订单 -->
-  <div id="v-my" style="display:none">
-    <div class="card"><h3>我的订单</h3><div id="myList"></div></div>
-  </div>
-  <!-- 后台 -->
-  <div id="v-adm" style="display:none">
-    <div class="card">
-      <h3>后台管理</h3>
-      <div class="row"><span>球号总数</span><input id="setTotal" type="number" min="1" style="width:80px;text-align:right"></div>
-      <button class="btn" onclick="saveTotal()">保存球号总数</button>
-      <div class="row"><span>单价（元）</span><input id="setPrice" type="number" min="0" step="0.01" style="width:80px;text-align:right"></div>
-      <button class="btn" onclick="savePrice()">保存单价</button>
-    </div>
-    <div class="card">
-      <h3>收款码</h3>
-      <input id="setQr" placeholder="收款码图片链接（如 https://.../qr.png）">
-      <button class="btn green" onclick="saveQr()">保存收款码</button>
-      <div class="qr" id="qrShow"></div>
-    </div>
-    <div class="card">
-      <h3>规则说明</h3>
-      <textarea id="setRule" placeholder="填写订购规则，用户选购页可见"></textarea>
-      <button class="btn" onclick="saveRule()">保存规则</button>
-    </div>
-    <div class="card">
-      <h3>订单管理</h3>
-      <div id="admOrders"></div>
-    </div>
-    <div class="card">
-      <h3>用户管理</h3>
-      <div id="admUsers"></div>
-      <button class="btn gray" onclick="exportData()">导出备份(JSON)</button>
-    </div>
-  </div>
+  <div id="view"></div>
 </div>
 
-<div class="tabbar" id="tb" style="display:none">
-  <div class="on" data-v="buy" onclick="tab(this)"><span class="ic">🎯</span>选购</div>
-  <div data-v="my" onclick="tab(this)"><span class="ic">📋</span>订单</div>
-  <div data-v="adm" onclick="tab(this)" id="tabAdm" style="display:none"><span class="ic">⚙️</span>后台</div>
-  <div data-v="login" onclick="logout()"><span class="ic">👤</span>退出</div>
+<div class="nav">
+  <div id="n-buy" onclick="showView('buy')"><span>🎯</span>选购</div>
+  <div id="n-my" onclick="showView('my')"><span>📋</span>我的</div>
+  <div id="n-adm" onclick="showView('adm')"><span>⚙️</span>后台</div>
 </div>
 
-<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
-<div class="toast" id="toast"></div>
+<div id="modal"><div id="mbox"></div></div>
+<div id="toast"></div>
 
 <script>
-// ========== 存储层 ==========
 const DB={
-  get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},
-  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+ get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},
+ set(k,v){localStorage.setItem(k,JSON.stringify(v))}
 };
-let _users=DB.get('users',[]),_orders=DB.get('orders',[]),_admins=DB.get('admins',[]),_me=null,_sel=[];
-let _total=DB.get('total',50),_price=DB.get('price',10),_qr=DB.get('qr',''),_rule=DB.get('rule','欢迎订购，付款后联系管理员确认。');
+let _users=DB.get('users',[]),_orders=DB.get('orders',[]);
+let _me=DB.get('me',null),_total=DB.get('total',36),_price=DB.get('price',10);
+let _qr=DB.get('qr',''),_rule=DB.get('rule','');
+let _sel=[],_qty=1,_cur='buy';
 
-// ========== 权限：仅 fenghua2898 为管理员 ==========
 function isAdmin(acc){return acc==='fenghua2898'}
 function curIsAdmin(){return _me&&isAdmin(_me.acc)}
-
-// ========== 视图 ==========
-function showView(v){
-  ['login','reg','buy','my','adm'].forEach(x=>document.getElementById('v-'+x).style.display=x===v?'':'none');
-  document.getElementById('tb').style.display=(v==='buy'||v==='my'||v==='adm')?'flex':'none';
-  document.querySelectorAll('.tabbar div').forEach(d=>d.classList.toggle('on',d.dataset.v===v));
-  document.getElementById('tabAdm').style.display=curIsAdmin()?'':'none';
-  if(v==='buy')renderBuy();if(v==='my')renderMy();if(v==='adm')renderAdm();
+function saveUsers(){DB.set('users',_users)}
+function saveOrders(){DB.set('orders',_orders)}
+function afterLogin(){
+  document.getElementById('n-adm').style.display=curIsAdmin()?'block':'none';
+  showView('buy')
 }
-function tab(el){showView(el.dataset.v)}
+function showView(v){
+  _cur=v;['buy','my','adm'].forEach(x=>document.getElementById('n-'+x).classList.toggle('on',x===v));
+  if(v==='buy')renderBuy();else if(v==='my')renderMy();else renderAdm()
+}
 
-// ========== 登录注册 ==========
+// 登录/注册
+function authView(){
+  return `<div class="card">
+    <div class="title">球号订购系统</div>
+    <input id="acc" placeholder="账号">
+    <input id="pwd" type="password" placeholder="密码">
+    <input id="nick" placeholder="昵称（注册用）">
+    <button class="btn purple" onclick="doLogin()">登录</button>
+    <button class="btn gray" onclick="doReg()">注册</button>
+    <div class="small center">仅账号 fenghua2898 为管理员</div>
+  </div>`
+}
 function doLogin(){
-  const acc=document.getElementById('lg-acc').value.trim(),pwd=document.getElementById('lg-pwd').value;
-  if(!acc||!pwd)return toast('请填账号密码');
+  const acc=document.getElementById('acc').value.trim(),pwd=document.getElementById('pwd').value.trim();
   const u=_users.find(x=>x.acc===acc&&x.pwd===pwd);
   if(!u)return toast('账号或密码错误');
-  // 强制清除非 fenghua2898 的历史管理员权限
-  if(acc!=='fenghua2898'&&DB.get('admins',[]).includes(acc)){
-    _admins=DB.get('admins',[]).filter(a=>a!==acc);DB.set('admins',_admins);
-  }
-  _me={acc,pwd,nick:u.nick};DB.set('me',_me);
-  toast('登录成功');afterLogin();
+  _me=u;DB.set('me',u);afterLogin();toast('登录成功')
 }
 function doReg(){
-  const acc=document.getElementById('rg-acc').value.trim(),pwd=document.getElementById('rg-pwd').value,nick=document.getElementById('rg-nick').value.trim()||acc;
-  if(!acc||!pwd)return toast('请填账号密码');
-  if(_users.find(x=>x.acc===acc))return toast('账号已存在');
-  _users.push({acc,pwd,nick});DB.set('users',_users);
-  _me={acc,pwd,nick};DB.set('me',_me);
-  toast('注册成功');afterLogin();
+  const acc=document.getElementById('acc').value.trim(),pwd=document.getElementById('pwd').value.trim(),nick=document.getElementById('nick').value.trim()||acc;
+  if(!acc||!pwd)return toast('账号密码不能为空');
+  if(_users.some(x=>x.acc===acc))return toast('账号已存在');
+  _users.push({acc,pwd,nick});saveUsers();
+  _me={acc,pwd,nick};DB.set('me',_me);afterLogin();toast('注册成功')
 }
-function afterLogin(){showView('buy')}
-function logout(){_me=null;DB.set('me',null);showView('login')}
+function logout(){_me=null;DB.set('me',null);document.getElementById('view').innerHTML=authView();document.getElementById('n-adm').style.display='none'}
 
-// ========== 选购 ==========
+// 选购
 function renderBuy(){
-  document.getElementById('ruleBox').innerHTML='<div class="small">📢 订购规则</div><div style="margin-top:6px;line-height:1.6">'+_rule.replace(/\n/g,'<br>')+'</div>';
-  const sold=new Set(_orders.filter(o=>o.status!=='取消').flatMap(o=>o.balls));
-  document.getElementById('soldCnt').textContent=sold.size;
-  document.getElementById('totCnt').textContent=_total;
-  let h='';for(let i=1;i<=_total;i++){
-    const cls=sold.has(i)?'sold':(_sel.includes(i)?'sel':'');
-    h+=`<div class="ball ${cls}" onclick="${sold.has(i)?'':`pickBall(${i})`}">${i}</div>`;
-  }
-  document.getElementById('ballGrid').innerHTML=h;
-  document.getElementById('selTxt').textContent=_sel.length?_sel.join(','):'无';
-  document.getElementById('priceTxt').textContent=_sel.length?`¥${(_sel.length*_price).toFixed(2)}`:'';
-  document.getElementById('orderBtn').style.display=_sel.length?'':'none';
+  if(!_me){document.getElementById('view').innerHTML=authView();return}
+  let balls='';
+  for(let i=1;i<=_total;i++)balls+=`<div class="ball ${_sel.includes(i)?'on':''}" onclick="pick(${i})">${i}</div>`;
+  const amount=(_sel.length*_qty*_price).toFixed(2);
+  document.getElementById('view').innerHTML=`
+  <div class="card">
+    <div class="title">🎯 选购球号</div>
+    <div class="sub">单价：¥${_price.toFixed(2)} / 个球号</div>
+    ${_rule?`<div class="small" style="margin-bottom:8px;white-space:pre-wrap">${_rule}</div>`:''}
+    <div class="balls">${balls}</div>
+  </div>
+  <div class="card">
+    <div class="title">购买数量</div>
+    <div class="qtybox">
+      <button onclick="chgQty(-1)">-</button>
+      <input id="qtyIn" type="number" min="1" value="${_qty}" onchange="setQty(this.value)">
+      <button onclick="chgQty(1)">+</button>
+    </div>
+    <div class="row"><span>已选球号</span><b>${_sel.length?_sel.join(','):'未选'}</b></div>
+    <div class="row"><span>数量</span><b>${_qty}</b></div>
+    <div class="row"><span>应付金额</span><b style="color:#e74c3c">¥${amount}</b></div>
+    <button class="btn purple" onclick="order()">确认下单</button>
+  </div>`
 }
-function pickBall(i){_sel.includes(i)?_sel=_sel.filter(x=>x!==i):_sel.push(i);renderBuy()}
-function doOrder(){
-  if(!_sel.length)return;
-  const balls=[..._sel];_orders.unshift({id:Date.now(),acc:_me.acc,nick:_me.nick,balls,price:balls.length*_price,status:'待付款',time:new Date().toLocaleString()});
-  DB.set('orders',_orders);_sel=[];renderBuy();toast('下单成功，请付款后等待确认');
-  modal('<h3>付款信息</h3><div class="center">'+( _qr?`<img src="${_qr}" style="max-width:200px">`:'<p>请联系管理员获取收款码</p>')+'<p class="small">金额：¥'+(balls.length*_price).toFixed(2)+'</p><button class="btn" onclick="closeModal()">知道了</button></div>');
+function pick(n){_sel.includes(n)?_sel=_sel.filter(x=>x!==n):_sel.push(n);_sel.sort((a,b)=>a-b);renderBuy()}
+function chgQty(d){_qty=Math.max(1,_qty+d);renderBuy()}
+function setQty(v){_qty=Math.max(1,parseInt(v)||1);renderBuy()}
+function order(){
+  if(!_sel.length)return toast('请先选择球号');
+  const amount=(_sel.length*_qty*_price).toFixed(2);
+  modal(`<div class="title">确认下单</div>
+    <div class="row"><span>球号</span><b>${_sel.join(',')}</b></div>
+    <div class="row"><span>数量</span><b>${_qty}</b></div>
+    <div class="row"><span>应付</span><b style="color:#e74c3c">¥${amount}</b></div>
+    ${_qr?`<img src="${_qr}" style="width:100%;border-radius:8px;margin:10px 0">`:'<div class="small">未设置收款码</div>'}
+    <button class="btn green" onclick="confirmOrder()">我已付款，确认提交</button>
+    <button class="btn gray" onclick="closeModal()">取消</button>`)
+}
+function confirmOrder(){
+  _orders.unshift({id:Date.now(),acc:_me.acc,nick:_me.nick,balls:[..._sel],qty:_qty,price:+(_sel.length*_qty*_price).toFixed(2),status:'待确认',time:new Date().toLocaleString()});
+  saveOrders();closeModal();_sel=[];_qty=1;renderBuy();toast('下单成功')
 }
 
-// ========== 我的订单 ==========
+// 我的
 function renderMy(){
-  const os=_orders.filter(o=>o.acc===_me.acc);
-  document.getElementById('myList').innerHTML=os.length?os.map(o=>`<div class="row"><div><b>球号 ${o.balls.join(',')}</b><div class="small">${o.time} · ¥${o.price.toFixed(2)}</div></div><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span></div>`).join(''):'<div class="center small">暂无订单</div>';
+  if(!_me)return authView();
+  const mine=_orders.filter(o=>o.acc===_me.acc);
+  document.getElementById('view').innerHTML=`<div class="card">
+    <div class="title">📋 我的订单</div>
+    ${mine.length?mine.map(o=>`<div class="row"><div><b>球号${o.balls.join(',')}</b> ×${o.qty}<div class="small">¥${o.price} · ${o.time}</div></div><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span></div>`).join(''):'<div class="center small">暂无订单</div>'}
+    <button class="btn gray" onclick="logout()" style="margin-top:12px">退出登录</button>
+  </div>`
 }
 
-// ========== 后台 ==========
+// 后台
 function renderAdm(){
   if(!curIsAdmin())return showView('buy');
-  document.getElementById('setTotal').value=_total;
-  document.getElementById('setPrice').value=_price;
-  document.getElementById('setQr').value=_qr;
-  document.getElementById('setRule').value=_rule;
-  document.getElementById('qrShow').innerHTML=_qr?`<img src="${_qr}">`:'<div class="small">未设置</div>';
-  document.getElementById('admOrders').innerHTML=_orders.length?_orders.map(o=>`<div class="row"><div><b>${o.nick}</b> 球号${o.balls.join(',')}<div class="small">¥${o.price.toFixed(2)} · ${o.time}</div></div><div><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span><button class="btn green" style="width:auto;padding:4px 10px;margin:0 4px;font-size:12px" onclick="setStatus(${o.id},'已确认')">确认</button><button class="btn red" style="width:auto;padding:4px 10px;font-size:12px" onclick="setStatus(${o.id},'取消')">取消</button></div></div>`).join(''):'<div class="small">暂无订单</div>';
-  document.getElementById('admUsers').innerHTML=_users.map(u=>`<div class="row"><span>${u.nick}(${u.acc})${isAdmin(u.acc)?' <span class="tag ok">管理员</span>':''}</span></div>`).join('');
+  document.getElementById('view').innerHTML=`
+  <div class="card">
+    <div class="title">⚙️ 后台设置</div>
+    <div class="sub">球号总数</div><input id="setTotal" value="${_total}">
+    <button class="btn purple" onclick="saveTotal()">保存总数</button>
+    <div class="sub">单价（元/球号）</div><input id="setPrice" value="${_price}">
+    <button class="btn purple" onclick="savePrice()">保存单价</button>
+    <div class="sub">收款码图片地址</div><input id="setQr" value="${_qr}">
+    <button class="btn purple" onclick="saveQr()">保存收款码</button>
+    <div class="sub">规则说明</div><textarea id="setRule" rows="3">${_rule}</textarea>
+    <button class="btn purple" onclick="saveRule()">保存规则</button>
+    <button class="btn green" onclick="exportData()">导出备份</button>
+  </div>
+  <div class="card">
+    <div class="title">订单管理</div>
+    ${_orders.length?_orders.map(o=>`<div class="row"><div><b>${o.nick}</b> 球号${o.balls.join(',')} ×${o.qty}<div class="small">¥${o.price} · ${o.time}</div></div><div><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span><button class="btn green" style="width:auto;padding:4px 8px;font-size:12px" onclick="setStatus(${o.id},'已确认')">确认</button><button class="btn red" style="width:auto;padding:4px 8px;font-size:12px" onclick="setStatus(${o.id},'取消')">取消</button></div></div>`).join(''):'<div class="small">暂无订单</div>'}
+  </div>
+  <div class="card">
+    <div class="title">用户列表</div>
+    ${_users.map(u=>`<div class="row"><span>${u.nick}(${u.acc})${isAdmin(u.acc)?' <span class="tag ok">管理员</span>':''}</span></div>`).join('')}
+  </div>`
 }
-function saveTotal(){_total=+document.getElementById('setTotal').value||1;DB.set('total',_total);toast('已保存');renderBuy()}
-function savePrice(){_price=+document.getElementById('setPrice').value||0;DB.set('price',_price);toast('已保存');renderBuy()}
+function saveTotal(){_total=Math.max(1,parseInt(document.getElementById('setTotal').value)||1);DB.set('total',_total);renderAdm();toast('已保存')}
+function savePrice(){_price=parseFloat(document.getElementById('setPrice').value)||0;DB.set('price',_price);renderAdm();toast('已保存')}
 function saveQr(){_qr=document.getElementById('setQr').value.trim();DB.set('qr',_qr);renderAdm();toast('已保存')}
 function saveRule(){_rule=document.getElementById('setRule').value;DB.set('rule',_rule);toast('已保存')}
-function setStatus(id,s){const o=_orders.find(x=>x.id===id);if(o){o.status=s;DB.set('orders',_orders);renderAdm();renderBuy();renderMy()}}
+function setStatus(id,s){const o=_orders.find(x=>x.id===id);if(o){o.status=s;saveOrders();renderAdm();renderMy()}}
 function exportData(){const d={users:_users,orders:_orders,total:_total,price:_price,qr:_qr,rule:_rule};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click();toast('已导出')}
 
-// ========== 工具 ==========
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
 function modal(h){document.getElementById('mbox').innerHTML='<span class="close" onclick="closeModal()">×</span>'+h;document.getElementById('modal').classList.add('on')}
 function closeModal(){document.getElementById('modal').classList.remove('on')}
 
-// 初始化
 (function(){
-  const m=DB.get('me',null);if(m)_me=m;
-  if(_me)afterLogin();else showView('login');
+  if(_me)afterLogin();else document.getElementById('view').innerHTML=authView();
 })();
 </script>
 </body>
