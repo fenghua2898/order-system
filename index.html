@@ -3,255 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>旺仔牛奶更不好卖了</title>
+<title>旺仔牛奶选购</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:sans-serif;background:#f4f6fa;padding-bottom:80px;font-size:14px}
-.wrap{max-width:480px;margin:0 auto;padding:10px}
-.card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.title{font-weight:bold;margin-bottom:8px;font-size:16px}
-.small{font-size:12px;color:#888}
-.btn{display:block;width:100%;padding:10px;border:none;border-radius:8px;margin:4px 0;cursor:pointer;font-size:15px}
-.btn-purple{background:#6c5ce7;color:#fff}
-.btn-orange{background:#ff9f43;color:#fff}
-.btn-green{background:#27ae60;color:#fff}
-.btn-red{background:#e74c3c;color:#fff}
-.btn-gray{background:#95a5a6;color:#fff}
-.sm{padding:6px 10px;font-size:13px;border:none;border-radius:6px;cursor:pointer;margin:2px}
-.purple{background:#6c5ce7;color:#fff}
-.orange{background:#ff9f43;color:#fff}
-.green{background:#27ae60;color:#fff}
-.red{background:#e74c3c;color:#fff}
-.gray{background:#95a5a6;color:#fff}
-input{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin:4px 0;font-size:15px}
-.bar{position:fixed;bottom:0;left:0;width:100%;background:#fff;padding:10px;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;max-width:480px;margin:0 auto;right:0}
-.ball{display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;border-radius:50%;margin:3px;font-size:14px;cursor:pointer;border:1px solid #ccc;background:#fff}
-.ball.sel-purple{background:#6c5ce7;color:#fff;border-color:#6c5ce7}
-.ball.sel-orange{background:#ff9f43;color:#fff;border-color:#ff9f43}
-.ball.locked{background:#eee;color:#aaa;border-color:#ddd;cursor:not-allowed}
-.tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:12px;margin:1px}
-.tag.ok{background:#d4edda;color:#155724}
-.tag.refund{background:#f8d7da;color:#721c24}
-.nav{display:flex;justify-content:space-around;background:#fff;padding:8px;position:fixed;bottom:0;width:100%;max-width:480px;left:50%;transform:translateX(-50%);border-top:1px solid #eee;z-index:99}
-.nav span{flex:1;text-align:center;padding:8px;cursor:pointer;font-size:13px}
-.mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:999}
-.pop{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:320px}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #f4f6fa; color: #333; padding-bottom: 80px; }
+.wrap { max-width: 480px; margin: 0 auto; padding: 12px; }
+.card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+h2, h3 { margin-bottom: 10px; font-size: 16px; }
+input, button, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #ddd; font-size: 15px; outline: none; }
+button { border: none; cursor: pointer; font-weight: 600; }
+.btn-purple { background: #6c5ce7; color: #fff; }
+.btn-green { background: #27ae60; color: #fff; }
+.btn-red { background: #e74c3c; color: #fff; }
+.btn-gray { background: #95a5a6; color: #fff; }
+.btn-orange { background: #e67e22; color: #fff; }
+.small { font-size: 12px; color: #888; }
+.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 8px 0; }
+.ball { padding: 10px 0; text-align: center; border-radius: 50%; border: 1px solid #ddd; background: #fff; font-weight: 700; font-size: 14px; cursor: pointer; user-select: none; }
+.ball.sel { background: #6c5ce7; color: #fff; border-color: #6c5ce7; }
+.ball.spec { border-color: #e67e22; color: #e67e22; }
+.ball.spec.sel { background: #e67e22; color: #fff; }
+.ball.locked { background: #eee; color: #bbb; pointer-events: none; text-decoration: line-through; }
+.tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+.tag.ok { background: #d4edda; color: #155724; }
+.tag.refund { background: #fff3cd; color: #856404; }
+#bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 10px 14px; box-shadow: 0 -2px 10px rgba(0,0,0,.1); display: flex; justify-content: space-between; align-items: center; z-index: 99; }
+.amt-input { width: 100%; padding: 10px; border: 2px solid #6c5ce7; border-radius: 8px; font-size: 18px; margin: 6px 0; }
+.amt-input.spec { border-color: #e67e22; }
+.section-title { font-weight: 700; margin: 12px 0 6px; font-size: 14px; }
+.section-title.spec { color: #e67e22; }
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
-<div class="nav" id="nav" style="display:none">
-  <span onclick="go('buy')">🛒选购</span>
-  <span onclick="go('my')">📋我的</span>
-  <span onclick="go('adm')" id="admNav" style="display:none">⚙️后台</span>
-</div>
-<div class="mask" id="mask"><div class="pop" id="pop"></div></div>
+<div id="bar" style="display:none"></div>
 
 <script>
-// ===== 防白屏兜底 =====
-window.onerror = function(msg){ console.error(msg); document.getElementById('app').innerHTML = '<div class="card"><b>页面出错：</b>'+msg+'<br><button class="btn btn-red" onclick="resetAll()">清空数据重置</button></div>'; return true; };
-
-// ===== 安全存储 =====
-const DB = {
-  get(k, d) { try { let v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
-};
-function resetAll(){ if(confirm('确定清空所有本地数据？')){ localStorage.clear(); location.reload(); } }
-
-// ===== 数据 =====
-let U = DB.get('users', []);
-let O = DB.get('orders', []);
-let M = DB.get('me', null);
-let QR = DB.get('qr', '');
-let QR_REFUND = DB.get('qrRefund', '');
-let RULE = DB.get('rule', '下单后不可更改');
-let CLOSE_H = DB.get('closeH', 21);
-let CLOSE_ON = DB.get('closeOn', true);
-let SPEC = DB.get('specNos', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
-let TOTAL_BALLS = 60;
-
-let selNorm = new Set(), selSpec = new Set();
-let amtNorm = '', amtSpec = '';
-
-// ===== 工具 =====
+// ===== 基础与存储 =====
 const $ = id => document.getElementById(id);
-const fmt = t => { let d=new Date(t); return d.getMonth()+1+'/'+d.getDate()+' '+['日','一','二','三','四','五','六'][d.getDay()]+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); };
-const isSpec = n => SPEC.includes(Number(n));
-const save = () => { DB.set('users',U); DB.set('orders',O); DB.set('me',M); DB.set('qr',QR); DB.set('qrRefund',QR_REFUND); DB.set('rule',RULE); DB.set('closeH',CLOSE_H); DB.set('closeOn',CLOSE_ON); DB.set('specNos',SPEC); };
-const toast = m => { let t=document.createElement('div'); t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:6px;z-index:9999'; t.innerText=m; document.body.appendChild(t); setTimeout(()=>t.remove(),1500); };
+const DB = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+};
+let U = DB.get('users', []), O = DB.get('orders', []), M = DB.get('me', null);
+let QR = DB.get('qr', ''), QR_REFUND = DB.get('qrRefund', ''), RULE = DB.get('rule', '');
+let CLOSE_H = DB.get('closeH', 21), CLOSE_ON = DB.get('closeOn', true);
+let SPEC = DB.get('specNos', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
+const TOTAL_BALLS = 60;
 
-function lockedNos(){ return O.filter(o=>o.status!=='取消'&&o.status!=='已退款').flatMap(o=>o.items.map(i=>i.no)); }
+const fmt = t => { const d = new Date(t); const w = ['日','一','二','三','四','五','六'][d.getDay()]; return `${d.getMonth()+1}/${d.getDate()} 周${w} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+const toast = m => { const d = document.createElement('div'); d.textContent = m; d.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:6px;z-index:9999;font-size:14px'; document.body.appendChild(d); setTimeout(()=>d.remove(), 1800); };
+const safeHide = el => { if (el) el.style.display = 'none'; };
+const safeShow = (el, v='flex') => { if (el) el.style.display = v; };
 
-// ===== 路由 =====
-function go(p){
-  $('nav').style.display = M ? 'flex' : 'none';
-  if(p==='buy') renderBuy();
-  else if(p==='my') renderMy();
-  else if(p==='adm') renderAdm();
+// ===== 渲染切换 =====
+function go(view) {
+  if (view === 'auth') renderAuth();
+  else if (view === 'buy') renderBuy();
+  else if (view === 'my') renderMy();
+  else if (view === 'adm') renderAdm();
 }
-function afterLogin(){ $('nav').style.display='flex'; $('admNav').style.display = M.acc==='fenghua2898'?'inline':'none'; go('buy'); }
+function afterLogin() { go('buy'); }
 
 // ===== 登录注册 =====
-function renderAuth(){
-  $('nav').style.display='none';
+function renderAuth() {
   $('app').innerHTML = `
-    <div class="card"><div class="title">🔐 登录/注册</div>
-      <input id="acc" placeholder="账号"><input id="pwd" type="password" placeholder="密码"><input id="nick" placeholder="昵称（注册必填）">
-      <button class="btn btn-purple" onclick="login()">登录</button>
-      <button class="btn btn-green" onclick="reg()">注册</button>
-      <button class="sm red" onclick="resetAll()" style="margin-top:8px">⚠️重置系统（清数据）</button>
+    <div class="card">
+      <h2>🔐 登录 / 注册</h2>
+      <input id="acc" placeholder="账号">
+      <input id="pwd" type="password" placeholder="密码">
+      <input id="nick" placeholder="昵称（选填）">
+      <button class="btn-purple" onclick="doLogin()">登录</button>
+      <button class="btn-green" onclick="doReg()">注册</button>
     </div>`;
-}
-function reg(){
-  let a=$('acc').value.trim(), p=$('pwd').value.trim(), n=$('nick').value.trim();
-  if(!a||!p||!n) return toast('都填上');
-  if(U.find(x=>x.acc===a)) return toast('账号已存在');
-  U.push({acc:a,pwd:p,nick:n}); save(); M={acc:a,nick:n}; toast('注册成功'); afterLogin();
-}
-function login(){
-  let a=$('acc').value.trim(), p=$('pwd').value.trim();
-  let u=U.find(x=>x.acc===a&&x.pwd===p);
-  if(!u) return toast('账号或密码错');
-  M={acc:u.acc,nick:u.nick}; save(); afterLogin();
+  safeHide($('bar'));
 }
 
-// ===== 选购页（核心修复） =====
-function renderBuy(){
-  let locked = lockedNos();
-  let normBalls=[], specBalls=[];
-  for(let i=1;i<=TOTAL_BALLS;i++){
-    if(isSpec(i)) specBalls.push(i); else normBalls.push(i);
-  }
-  
-  let h = `<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL_BALLS} 个）</div>`;
-  
-  // 特价球
-  h += `<div style="margin-bottom:10px"><b style="color:#ff9f43">🔥 特价球（${specBalls.length}个）</b><br>`;
-  specBalls.forEach(n=>{
-    let l=locked.includes(n), s=selSpec.has(n);
-    h += `<span class="ball ${l?'locked':s?'sel-orange':''}" ${l?'':`onclick="toggleSpec(${n})"`}>${n}</span>`;
-  });
-  h += `</div>`;
-  
-  // 普通球
-  h += `<div><b style="color:#6c5ce7">⚪ 普通球（${normBalls.length}个）</b><br>`;
-  normBalls.forEach(n=>{
-    let l=locked.includes(n), s=selNorm.has(n);
-    h += `<span class="ball ${l?'locked':s?'sel-purple':''}" ${l?'':`onclick="toggleNorm(${n})"`}>${n}</span>`;
-  });
-  h += `</div>`;
-  
-  if(locked.length) h += `<div class="small" style="margin-top:8px">🔒 已下单锁定：${locked.join('、')}</div>`;
-  h += `</div>`;
-  
-  // 金额区
-  let total=0;
-  if(selNorm.size){
-    let a = parseFloat(amtNorm)||0;
-    total += selNorm.size*a;
-    h += `<div class="card"><b>⚪ 普通球已选 ${selNorm.size} 个</b><br><span class="small">${[...selNorm].sort((a,b)=>a-b).join('、')}</span><br>
-      <input type="text" inputmode="numeric" placeholder="每个金额" value="${amtNorm}" oninput="amtNorm=this.value.replace(/[^0-9.]/g,'').replace(/(\\..*?)\\./g,'$1');updateBar()" style="margin-top:6px">
-      <div class="small">小计：${selNorm.size} × ¥${a.toFixed(2)} = ¥${(selNorm.size*a).toFixed(2)}</div></div>`;
-  }
-  if(selSpec.size){
-    let a = parseFloat(amtSpec)||0;
-    total += selSpec.size*a;
-    h += `<div class="card"><b style="color:#ff9f43">🔥 特价球已选 ${selSpec.size} 个</b><br><span class="small">${[...selSpec].sort((a,b)=>a-b).join('、')}</span><br>
-      <input type="text" inputmode="numeric" placeholder="特价金额" value="${amtSpec}" oninput="amtSpec=this.value.replace(/[^0-9.]/g,'').replace(/(\\..*?)\\./g,'$1');updateBar()" style="margin-top:6px">
-      <div class="small">小计：${selSpec.size} × ¥${a.toFixed(2)} = ¥${(selSpec.size*a).toFixed(2)}</div></div>`;
-  }
-  
-  h += `<button class="btn btn-purple" onclick="showConfirm()" ${selNorm.size||selSpec.size?'':'disabled'}>确认下单</button>`;
-  h += `<button class="btn btn-gray" onclick="M=null;save();renderAuth()">退出登录</button>`;
-  
-  $('app').innerHTML = h;
-  $('bar').style.display = (selNorm.size||selSpec.size)?'flex':'none';
-  $('bar').innerHTML = `<span>合计 <b style="color:#e74c3c">¥${total.toFixed(2)}</b>（${selNorm.size+selSpec.size}个）</span><button class="btn-purple sm" onclick="showConfirm()">下单</button>`;
+function doReg() {
+  const acc = $('acc').value.trim(), pwd = $('pwd').value.trim(), nick = $('nick').value.trim() || acc;
+  if (!acc || !pwd) return toast('填完整');
+  if (U.find(x => x.acc === acc)) return toast('账号已存在');
+  U.push({ acc, pwd, nick });
+  DB.set('users', U);
+  toast('注册成功，请登录');
 }
 
-function toggleNorm(n){ if(lockedNos().includes(n))return; selNorm.has(n)?selNorm.delete(n):selNorm.add(n); renderBuy(); }
-function toggleSpec(n){ if(lockedNos().includes(n))return; selSpec.has(n)?selSpec.delete(n):selSpec.add(n); renderBuy(); }
-function updateBar(){ renderBuy(); }
+function doLogin() {
+  const acc = $('acc').value.trim(), pwd = $('pwd').value.trim();
+  const u = U.find(x => x.acc === acc && x.pwd === pwd);
+  if (!u) return toast('账号或密码错');
+  M = u; DB.set('me', M);
+  afterLogin();
+}
 
-function showConfirm(){
-  let locked = lockedNos();
-  let items=[];
-  let aN = parseFloat(amtNorm)||0, aS = parseFloat(amtSpec)||0;
-  if(!aN && !aS) return toast('请填金额');
-  selNorm.forEach(n=>{ if(!locked.includes(n)) items.push({no:n,amt:aN,spec:false}); });
-  selSpec.forEach(n=>{ if(!locked.includes(n)) items.push({no:n,amt:aS,spec:true}); });
-  if(!items.length) return toast('没可选号码');
-  let total = items.reduce((s,i)=>s+i.amt,0);
-  let h = `<div class="title">确认下单</div><div>${items.map(i=>`<div>${i.spec?'🔥':'⚪'}${i.no} ￥${i.amt.toFixed(2)}</div>`).join('')}</div>
-    <div style="margin-top:8px"><b>总计：¥${total.toFixed(2)}</b></div>
-    <div class="small">${RULE}</div>
-    ${CLOSE_ON&&new Date().getHours()>=CLOSE_H?'<div class="red">⚠️ 已过 ${CLOSE_H}:00，今日停单</div>':''}
-    <button class="btn btn-green" onclick="doOrder(${JSON.stringify(items)},${total})">扫码付款提交</button>
-    <button class="btn btn-gray" onclick="$('mask').style.display='none'">返回</button>`;
-  $('pop').innerHTML=h; $('mask').style.display='flex';
+// ===== 选购页（特价球独立一栏 + 金额可输20）=====
+let selNorm = [], selSpec = [], normAmt = '', specAmt = '';
+function renderBuy() {
+  if (CLOSE_ON && new Date().getHours() >= CLOSE_H) {
+    $('app').innerHTML = `<div class="card"><h2>⏰ 已停单</h2><div>每日 ${CLOSE_H}:00 后停单，明天再来</div><button class="btn-gray" onclick="M=null;DB.set('me',null);renderAuth()">退出</button></div>`;
+    safeHide($('bar')); return;
+  }
+  
+  const locked = O.filter(o => o.status !== '取消' && o.status !== '已退款').flatMap(o => o.items.map(i => i.no));
+  
+  const normBalls = [], specBalls = [];
+  for (let i = 1; i <= TOTAL_BALLS; i++) {
+    const isSpec = SPEC.includes(i);
+    const isLocked = locked.includes(i);
+    const sel = isSpec ? selSpec.includes(i) : selNorm.includes(i);
+    const cls = `ball ${isSpec ? 'spec' : ''} ${sel ? 'sel' : ''} ${isLocked ? 'locked' : ''}`;
+    const html = `<div class="${cls}" onclick="toggleBall(${i})">${i}</div>`;
+    if (isSpec) specBalls.push(html); else normBalls.push(html);
+  }
+  
+  $('app').innerHTML = `
+    <div class="card">
+      <h2>🎯 选购球号（共 ${TOTAL_BALLS} 个）</h2>
+      ${locked.length ? `<div class="small">🔒 已被下单（本轮不可选）：${locked.join('、')}</div>` : ''}
+      
+      <div class="section-title spec">🔥 特价球（${SPEC.length}个）</div>
+      <div class="grid">${specBalls.join('')}</div>
+      
+      <div class="section-title">⚪ 普通球（${TOTAL_BALLS - SPEC.length}个）</div>
+      <div class="grid">${normBalls.join('')}</div>
+      
+      ${selSpec.length ? `<div style="margin-top:12px;padding:10px;background:#fff3e0;border-radius:8px">
+        <div class="small">🔥 特价球已选 ${selSpec.length} 个：${selSpec.join('、')}</div>
+        <input class="amt-input spec" id="specAmtInput" inputmode="numeric" placeholder="输入特价金额（如50）" value="${specAmt}">
+        <div class="small">小计：${selSpec.length} × ¥${parseFloat(specAmt||0).toFixed(2)} = ¥${(selSpec.length * parseFloat(specAmt||0)).toFixed(2)}</div>
+      </div>` : ''}
+      
+      ${selNorm.length ? `<div style="margin-top:12px;padding:10px;background:#f3f0ff;border-radius:8px">
+        <div class="small">⚪ 普通球已选 ${selNorm.length} 个：${selNorm.join('、')}</div>
+        <input class="amt-input" id="normAmtInput" inputmode="numeric" placeholder="输入金额（如20）" value="${normAmt}">
+        <div class="small">小计：${selNorm.length} × ¥${parseFloat(normAmt||0).toFixed(2)} = ¥${(selNorm.length * parseFloat(normAmt||0)).toFixed(2)}</div>
+      </div>` : ''}
+      
+      <button class="btn-gray" onclick="M=null;DB.set('me',null);renderAuth()" style="margin-top:12px">退出</button>
+    </div>`;
+  
+  // 绑定金额输入（不重建DOM，保证能输20）
+  const sInput = $('specAmtInput'), nInput = $('normAmtInput');
+  if (sInput) sInput.oninput = e => { specAmt = e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1'); e.target.value = specAmt; updateBar(); };
+  if (nInput) nInput.oninput = e => { normAmt = e.target.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1'); e.target.value = normAmt; updateBar(); };
+  
+  updateBar();
 }
-function doOrder(items,total){
-  $('pop').innerHTML = `<div class="title">扫码付款</div>${QR?'<img src="'+QR+'" style="width:200px;height:200px;display:block;margin:0 auto"><div class="small">长按识别付款</div>':'<div class="red">管理员未设置收款码</div>'}
-    <button class="btn btn-purple" onclick="submitOrd(${JSON.stringify(items)},${total})">已付款，提交订单</button>
-    <button class="btn btn-gray" onclick="$('mask').style.display='none'">返回</button>`;
+
+function toggleBall(no) {
+  const isSpec = SPEC.includes(no);
+  if (isSpec) { selSpec.includes(no) ? selSpec = selSpec.filter(x => x !== no) : selSpec.push(no); }
+  else { selNorm.includes(no) ? selNorm = selNorm.filter(x => x !== no) : selNorm.push(no); }
+  renderBuy();
 }
-function submitOrd(items,total){
-  O.push({id:Date.now(),acc:M.acc,nick:M.nick,items,price:total,status:'待确认',time:Date.now()});
-  save(); selNorm.clear(); selSpec.clear(); amtNorm=''; amtSpec='';
-  $('mask').style.display='none'; toast('提交成功，等待确认'); go('my');
+
+function updateBar() {
+  const total = selSpec.length * parseFloat(specAmt || 0) + selNorm.length * parseFloat(normAmt || 0);
+  const bar = $('bar');
+  if (!bar) return;
+  if (selSpec.length || selNorm.length) {
+    bar.innerHTML = `<div><div class="small">合计</div><b style="color:#e74c3c">¥${total.toFixed(2)}</b><div class="small">共 ${selSpec.length + selNorm.length} 个号</div></div><button class="btn-purple" style="width:auto;padding:10px 20px" onclick="confirmOrder()">确认下单</button>`;
+    safeShow(bar);
+  } else { safeHide(bar); }
+}
+
+function confirmOrder() {
+  if (!selSpec.length && !selNorm.length) return toast('先选球号');
+  const specMoney = parseFloat(specAmt), normMoney = parseFloat(normAmt);
+  if (selSpec.length && (!specMoney || specMoney <= 0)) return toast('填特价金额');
+  if (selNorm.length && (!normMoney || normMoney <= 0)) return toast('填普通金额');
+  
+  const items = [
+    ...selSpec.map(no => ({ no, amt: specMoney, spec: true })),
+    ...selNorm.map(no => ({ no, amt: normMoney, spec: false }))
+  ];
+  const price = items.reduce((s, i) => s + i.amt, 0);
+  
+  $('app').innerHTML = `
+    <div class="card">
+      <h2>📝 确认下单</h2>
+      <div>明细：</div>
+      ${items.map(i => `<div class="small">${i.spec ? '🔥' : '⚪'} 球号 ${i.no}：¥${i.amt.toFixed(2)}</div>`).join('')}
+      <div style="margin-top:8px;border-top:1px solid #eee;padding-top:8px"><b>总额：¥${price.toFixed(2)}</b></div>
+      ${QR ? `<div style="margin-top:12px"><div class="small">扫码付款：</div><img src="${QR}" style="width:200px;max-width:100%;border-radius:8px;margin:6px 0"></div>` : ''}
+      <button class="btn-green" onclick="submitOrder(${JSON.stringify(items)}, ${price})">已付款，提交</button>
+      <button class="btn-gray" onclick="renderBuy()">返回修改</button>
+    </div>`;
+  safeHide($('bar'));
+}
+
+function submitOrder(items, price) {
+  const o = { id: Date.now(), uid: M.acc, nick: M.nick, items, price, status: '待确认', time: Date.now() };
+  O.push(o); DB.set('orders', O);
+  selNorm = []; selSpec = []; normAmt = ''; specAmt = '';
+  toast('提交成功，等待确认');
+  go('my');
 }
 
 // ===== 我的订单 =====
-function renderMy(){
-  let mine = O.filter(o=>o.acc===M.acc);
-  let h = `<div class="card"><div class="title">📋 我的订单（${mine.length}）</div>`;
-  if(!mine.length) h+='<div class="small">暂无</div>';
-  mine.reverse().forEach(o=>{
+function renderMy() {
+  const mine = O.filter(o => o.uid === M.acc);
+  let h = `<div class="card"><h2>📋 我的订单（${mine.length}）</h2>`;
+  mine.slice().reverse().forEach(o => {
     h += `<div style="border:1px solid #eee;padding:8px;margin:6px 0;border-radius:8px">
       <div style="display:flex;justify-content:space-between"><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':''}">${o.status}</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>
-      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} $${i.amt.toFixed(2)}</span>`).join('')}</div>
-      <div class="small">📅${fmt(o.time)}</div>
+      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} ¥${i.amt.toFixed(2)}</span>`).join('')}</div>
+      <div class="small">📅 ${fmt(o.time)}</div>
+      ${RULE ? `<div class="small" style="margin-top:4px;color:#e67e22">📌 ${RULE}</div>` : ''}
     </div>`;
   });
-  h += `<button class="btn btn-gray" onclick="M=null;save();renderAuth()">退出</button></div>`;
-  $('app').innerHTML=h; $('bar').style.display='none';
+  if (!mine.length) h += '<div class="small">暂无订单</div>';
+  h += `<button class="btn-gray" onclick="M=null;DB.set('me',null);renderAuth()">退出</button></div>`;
+  $('app').innerHTML = h;
+  safeHide($('bar'));
 }
 
 // ===== 后台 =====
-function renderAdm(){
-  if(!M||M.acc!=='fenghua2898'){ go('buy'); return; }
-  let h = `<div class="card"><div class="title">⚙️ 后台（管理员）</div>
-    <div>订单数：${O.length} | 总额：¥${O.reduce((s,o)=>s+o.price,0).toFixed(2)}</div>
-    <div class="small" style="margin-top:8px">收款码URL</div><input id="qrI" value="${QR}"><button class="sm purple" onclick="QR=$('qrI').value;save();toast('✓')">保存</button>
-    <div class="small">特价球号（逗号分隔，默认1-15）</div><input id="spI" value="${SPEC.join(',')}"><button class="sm orange" onclick="SPEC=$('spI').value.split(',').map(Number).filter(n=>n);save();toast('✓')">保存</button>
-    <div class="small">停单时间</div><input id="clI" type="number" value="${CLOSE_H}"><label><input type="checkbox" id="clO" ${CLOSE_ON?'checked':''}>启用停单</label>
-    <button class="sm purple" onclick="CLOSE_H=parseInt($('clI').value);CLOSE_ON=$('clO').checked;save();toast('✓')">保存停单</button>
-    <h3 style="margin-top:10px">全部订单（${O.length}）</h3>`;
-  O.forEach(o=>{
-    h += `<div style="border:1px solid #eee;padding:6px;margin:4px 0;border-radius:6px">
+function renderAdm() {
+  if (!M || M.acc !== 'fenghua2898') { go('buy'); return; }
+  let h = `<div class="card"><h2>⚙️ 后台管理</h2>`;
+  h += `<div>订单数：${O.length}｜总额：¥${O.reduce((s,o)=>s+o.price,0).toFixed(2)}</div>`;
+  h += `<div class="small" style="margin-top:8px">收款码URL</div><input id="qr" value="${QR}"><button class="btn-purple" onclick="QR=$('qr').value;DB.set('qr',QR);toast('✓')">保存</button>`;
+  h += `<div class="small" style="margin-top:8px">特价球号（逗号分隔，如1,2,3）</div><input id="sp" value="${SPEC.join(',')}"><button class="btn-orange" onclick="SPEC=$('sp').value.split(',').map(Number).filter(Boolean);DB.set('specNos',SPEC);toast('✓ 刷新后生效');renderAdm()">保存</button>`;
+  h += `<div class="small" style="margin-top:8px">停单时间</div><select id="ch">${[...Array(24)].map((_,i)=>`<option value="${i}" ${i===CLOSE_H?'selected':''}>${i}:00</option>`).join('')}</select><label><input type="checkbox" id="co" ${CLOSE_ON?'checked':''}>启用停单</label><button class="btn-purple" onclick="CLOSE_H=parseInt($('ch').value);CLOSE_ON=$('co').checked;DB.set('closeH',CLOSE_H);DB.set('closeOn',CLOSE_ON);toast('✓')">保存</button>`;
+  h += `<h3>全部订单（${O.length}）</h3>`;
+  O.slice().reverse().forEach(o => {
+    h += `<div style="border:1px solid #eee;padding:8px;margin:6px 0;border-radius:8px">
       <div style="display:flex;justify-content:space-between"><b>${o.nick}(${o.acc})</b><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':''}">${o.status}</span></div>
-      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} $${i.amt.toFixed(2)}</span>`).join('')}</div>
-      <div style="display:flex;justify-content:space-between"><span class="small">📅${fmt(o.time)}</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>
-      <button class="sm green" onclick="setSt(${o.id},'已确认')">收款</button>
-      <button class="sm red" onclick="setSt(${o.id},'取消')">取消</button>
-      <button class="sm gray" onclick="setSt(${o.id},'已退款')">退款</button>
+      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} ¥${i.amt.toFixed(2)}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between"><span class="small">📅 ${fmt(o.time)}</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>
+      <button class="btn-green" onclick="setSt(${o.id},'已确认')">收款</button>
+      <button class="btn-red" onclick="setSt(${o.id},'取消')">取消</button>
+      <button class="btn-gray" onclick="setSt(${o.id},'已退款')">退款</button>
     </div>`;
   });
-  h += `<button class="btn btn-green" onclick="exportData()">📦 导出备份</button>
-        <button class="btn btn-red" onclick="importData()">📥 导入备份</button>
-        <button class="btn btn-gray" onclick="M=null;save();renderAuth()">退出</button></div>`;
-  $('app').innerHTML=h; $('bar').style.display='none';
+  h += `<button class="btn-green" onclick="exportData()">📦 导出备份</button>
+        <button class="btn-red" onclick="if(confirm('确定清空所有数据？')){localStorage.clear();location.reload()}">⚠️清空数据重置</button>
+        <button class="btn-gray" onclick="M=null;DB.set('me',null);renderAuth()">退出</button></div>`;
+  $('app').innerHTML = h;
+  safeHide($('bar'));
 }
-function setSt(id,s){ let o=O.find(x=>x.id===id); if(o){ o.status=s; if(s==='已确认')o.paidAt=Date.now(); save(); renderAdm(); renderMy(); } }
-function exportData(){ const d={users:U,orders:O,qr:QR,qrRefund:QR_REFUND,rule:RULE,closeH:CLOSE_H,closeOn:CLOSE_ON,specNos:SPEC}; const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click(); }
-function importData(){ let i=document.createElement('input'); i.type='file'; i.onchange=e=>{ let f=e.target.files[0]; let r=new FileReader(); r.onload=ev=>{ try{ let d=JSON.parse(ev.target.result); U=d.users||U; O=d.orders||O; QR=d.qr||QR; SPEC=d.specNos||SPEC; save(); toast('导入成功'); renderAdm(); }catch(err){toast('文件错误')} }; r.readAsText(f); }; i.click(); }
+
+function setSt(id, s) { const o = O.find(x => x.id === id); if (o) { o.status = s; if (s === '已确认') o.paidAt = Date.now(); DB.set('orders', O); renderAdm(); renderMy(); } }
+function exportData() { const d = { users: U, orders: O, qr: QR, qrRefund: QR_REFUND, rule: RULE, closeH: CLOSE_H, closeOn: CLOSE_ON, specNos: SPEC }; const b = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'backup.json'; a.click(); }
 
 // ===== 启动 =====
-try{
-  if(M) afterLogin(); else renderAuth();
-}catch(e){
+try {
+  if (M) afterLogin(); else renderAuth();
+} catch (e) {
   console.error(e);
-  $('app').innerHTML = '<div class="card"><b>初始化失败</b><br>'+e.message+'<br><button class="btn btn-red" onclick="resetAll()">清空数据重置</button></div>';
+  $('app').innerHTML = `<div class="card"><b>页面出错：${e.message}</b><br><button class="btn-red" onclick="localStorage.clear();location.reload()">清空数据重置</button></div>`;
 }
 </script>
 </body>
