@@ -38,9 +38,8 @@ input:focus,textarea:focus{border-color:#6c5ce7;outline:none}
 .close{position:absolute;right:12px;top:8px;font-size:22px;color:#999;cursor:pointer}
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:8px;z-index:99;display:none;font-size:14px}
 #toast.show{display:block}
-.qtybox{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.qtybox button{width:36px;height:36px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:18px;cursor:pointer}
-.qtybox input{width:70px;text-align:center;margin:0}
+.amt-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.amt-row input{margin:0;width:80px;text-align:center}
 </style>
 </head>
 <body>
@@ -62,8 +61,8 @@ const DB={
 };
 let _users=DB.get('users',[]),_orders=DB.get('orders',[]);
 let _me=DB.get('me',null),_total=DB.get('total',36);
-let _ref=DB.get('ref',0),_qr=DB.get('qr',''),_rule=DB.get('rule','');
-let _sel=[],_qty=1,_amt=null;
+let _qr=DB.get('qr',''),_rule=DB.get('rule','');
+let _sel=[],_ballAmts={};
 
 function isAdmin(acc){return acc==='fenghua2898'}
 function curIsAdmin(){return _me&&isAdmin(_me.acc)}
@@ -77,6 +76,7 @@ function showView(v){
   ['buy','my','adm'].forEach(x=>document.getElementById('n-'+x).classList.toggle('on',x===v));
   if(v==='buy')renderBuy();else if(v==='my')renderMy();else renderAdm()
 }
+function totalAmt(){return _sel.reduce((s,n)=>s+(parseFloat(_ballAmts[n])||0),0)}
 
 /* 登录注册 */
 function authView(){
@@ -106,54 +106,52 @@ function doReg(){
 function logout(){_me=null;DB.set('me',null);document.getElementById('view').innerHTML=authView();document.getElementById('n-adm').style.display='none'}
 
 /* 选购 */
-function suggested(){return (_sel.length*_qty*_ref).toFixed(2)}
 function renderBuy(){
   if(!_me){document.getElementById('view').innerHTML=authView();return}
   let balls='';
   for(let i=1;i<=_total;i++)balls+=`<div class="ball ${_sel.includes(i)?'on':''}" onclick="pick(${i})">${i}</div>`;
-  const sug=suggested();
-  const amtVal=_amt===null?sug:_amt;
+  const tAmt=totalAmt();
+  let amtInputs='';
+  _sel.forEach(n=>{
+    amtInputs+=`<div class="amt-row"><span style="min-width:40px">${n}号</span><input type="number" min="0" step="0.01" value="${_ballAmts[n]||''}" placeholder="金额" oninput="_ballAmts[${n}]=this.value">元</div>`;
+  });
   document.getElementById('view').innerHTML=`
   <div class="card">
     <div class="title">🎯 选购球号</div>
-    ${_ref>0?`<div class="sub">参考价：¥${_ref.toFixed(2)}/球号（仅供参考，金额可自行填写）</div>`:''}
     ${_rule?`<div class="small" style="margin-bottom:8px;white-space:pre-wrap">💡 ${_rule}</div>`:''}
     <div class="balls">${balls}</div>
   </div>
   <div class="card">
-    <div class="title">填写订单</div>
-    <div class="sub">购买数量</div>
-    <div class="qtybox">
-      <button onclick="chgQty(-1)">−</button>
-      <input id="qtyIn" type="number" min="1" value="${_qty}" onchange="setQty(this.value)">
-      <button onclick="chgQty(1)">＋</button>
-    </div>
-    <div class="sub">付款金额（元）${_ref>0?'（已按参考价预填，可修改）':''}</div>
-    <input id="amtIn" type="number" min="0" step="0.01" value="${amtVal}" oninput="_amt=this.value" placeholder="请输入金额">
-    <div class="row"><span>已选球号</span><b>${_sel.length?_sel.join(','):'未选'}</b></div>
-    <div class="row"><span>付款金额</span><span class="big">¥${(parseFloat(amtVal)||0).toFixed(2)}</span></div>
+    <div class="title">填写金额</div>
+    <div class="sub">为每个选中的球号填写金额</div>
+    <div id="amtList">${amtInputs||'<div class="small" style="color:#aaa">请先选择球号</div>'}</div>
+    <div class="row" style="margin-top:12px;border-top:2px solid #eee;padding-top:12px"><span style="font-size:16px;font-weight:700">合计金额</span><span class="big">¥${tAmt.toFixed(2)}</span></div>
     <button class="btn purple" onclick="order()">确认下单</button>
   </div>`
 }
-function pick(n){_sel.includes(n)?_sel=_sel.filter(x=>x!==n):_sel.push(n);_sel.sort((a,b)=>a-b);_amt=null;renderBuy()}
-function chgQty(d){_qty=Math.max(1,_qty+d);_amt=null;renderBuy()}
-function setQty(v){_qty=Math.max(1,parseInt(v)||1);_amt=null;renderBuy()}
+function pick(n){
+  if(_sel.includes(n)){_sel=_sel.filter(x=>x!==n);delete _ballAmts[n]}
+  else{_sel.push(n);_ballAmts[n]=''}
+  _sel.sort((a,b)=>a-b);renderBuy()
+}
 function order(){
   if(!_sel.length)return toast('请先选择球号');
-  const amt=parseFloat(document.getElementById('amtIn').value)||0;
-  if(amt<=0)return toast('请填写付款金额');
+  const missing=_sel.filter(n=>!_ballAmts[n]||parseFloat(_ballAmts[n])<=0);
+  if(missing.length)return toast(`${missing.join(',')}号还没填金额`);
+  const tAmt=totalAmt();
   modal(`<div class="title">确认下单</div>
-    <div class="row"><span>球号</span><b>${_sel.join(',')}</b></div>
-    <div class="row"><span>数量</span><b>${_qty}</b></div>
-    <div class="row"><span>付款金额</span><span class="big">¥${amt.toFixed(2)}</span></div>
+    ${_sel.map(n=>`<div class="row"><span>${n}号</span><b>¥${(parseFloat(_ballAmts[n])||0).toFixed(2)}</b></div>`).join('')}
+    <div class="row" style="border-top:2px solid #eee;margin-top:8px;padding-top:12px"><span style="font-size:16px;font-weight:700">合计</span><span class="big">¥${tAmt.toFixed(2)}</span></div>
     ${_qr?`<img src="${_qr}" style="width:100%;border-radius:8px;margin:10px 0">`:'<div class="small">⚠️ 管理员还没设置收款码</div>'}
-    <div class="small center" style="margin-bottom:10px">请按上面金额扫码付款，然后点下面按钮</div>
-    <button class="btn green" onclick="confirmOrder(${amt})">我已付款，确认提交</button>
+    <div class="small center" style="margin-bottom:10px">请按合计金额扫码付款</div>
+    <button class="btn green" onclick="confirmOrder()">我已付款，确认提交</button>
     <button class="btn gray" onclick="closeModal()">取消</button>`)
 }
-function confirmOrder(amt){
-  _orders.unshift({id:Date.now(),acc:_me.acc,nick:_me.nick,balls:[..._sel],qty:_qty,price:amt,status:'待确认',time:new Date().toLocaleString()});
-  saveOrders();closeModal();_sel=[];_qty=1;_amt=null;renderBuy();toast('下单成功，等卖家确认')
+function confirmOrder(){
+  const items=_sel.map(n=>({no:n,amt:parseFloat(_ballAmts[n])||0}));
+  const tAmt=totalAmt();
+  _orders.unshift({id:Date.now(),acc:_me.acc,nick:_me.nick,items,price:tAmt,status:'待确认',time:new Date().toLocaleString()});
+  saveOrders();closeModal();_sel=[];_ballAmts={};renderBuy();toast('下单成功，等卖家确认')
 }
 
 /* 我的 */
@@ -162,7 +160,7 @@ function renderMy(){
   const mine=_orders.filter(o=>o.acc===_me.acc);
   document.getElementById('view').innerHTML=`<div class="card">
     <div class="title">📋 我的订单</div>
-    ${mine.length?mine.map(o=>`<div class="row"><div><b>球号${o.balls.join(',')}</b> ×${o.qty}<div class="small">¥${o.price} · ${o.time}</div></div><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span></div>`).join(''):'<div class="center small">暂无订单</div>'}
+    ${mine.length?mine.map(o=>`<div class="row"><div><b>${o.items.map(i=>i.no+'号¥'+i.amt).join(', ')}</b><div class="small">合计¥${o.price} · ${o.time}</div></div><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span></div>`).join(''):'<div class="center small">暂无订单</div>'}
     <button class="btn gray" onclick="logout()" style="margin-top:12px">退出登录</button>
   </div>`
 }
@@ -181,8 +179,6 @@ function renderAdm(){
   <div class="card">
     <div class="sub">球号总数</div><input id="setTotal" value="${_total}">
     <button class="btn purple" onclick="saveTotal()">保存总数</button>
-    <div class="sub">参考单价（填 0 = 不预填，让客户自己输）</div><input id="setRef" value="${_ref}">
-    <button class="btn purple" onclick="saveRef()">保存参考价</button>
     <div class="sub">收款码图片地址</div><input id="setQr" value="${_qr}" placeholder="https://...">
     <button class="btn purple" onclick="saveQr()">保存收款码</button>
     ${_qr?`<img src="${_qr}" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px">`:''}
@@ -192,7 +188,7 @@ function renderAdm(){
   </div>
   <div class="card">
     <div class="title">订单管理</div>
-    ${_orders.length?_orders.map(o=>`<div class="row"><div style="min-width:0"><b>${o.nick}</b><div class="small">球号${o.balls.join(',')} ×${o.qty} · ¥${o.price}</div><div class="small">${o.time}</div></div><div style="text-align:right"><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span><div style="margin-top:4px"><button class="btn green" style="width:auto;padding:4px 8px;font-size:12px" onclick="setStatus(${o.id},'已确认')">确认</button><button class="btn red" style="width:auto;padding:4px 8px;font-size:12px" onclick="setStatus(${o.id},'取消')">取消</button></div></div></div>`).join(''):'<div class="small">暂无订单</div>'}
+    ${_orders.length?_orders.map(o=>`<div class="row"><div style="min-width:0"><b>${o.nick}</b><div class="small">${o.items.map(i=>i.no+'号¥'+i.amt).join(', ')}</div><div class="small">合计¥${o.price} · ${o.time}</div></div><div style="text-align:right"><span class="tag ${o.status==='已确认'?'ok':''}">${o.status}</span><div style="margin-top:4px"><button class="btn green" style="width:auto;padding:4px 8px;font-size:12px" onclick="setStatus(${o.id},'已确认')">确认</button><button class="btn red" style="width:auto;padding:4px 8px;font-size:12px" onclick="setStatus(${o.id},'取消')">取消</button></div></div></div>`).join(''):'<div class="small">暂无订单</div>'}
   </div>
   <div class="card">
     <div class="title">用户（${_users.length}）</div>
@@ -201,11 +197,10 @@ function renderAdm(){
   </div>`
 }
 function saveTotal(){_total=Math.max(1,parseInt(document.getElementById('setTotal').value)||1);DB.set('total',_total);renderAdm();toast('已保存')}
-function saveRef(){_ref=Math.max(0,parseFloat(document.getElementById('setRef').value)||0);DB.set('ref',_ref);_amt=null;renderAdm();toast('已保存')}
 function saveQr(){_qr=document.getElementById('setQr').value.trim();DB.set('qr',_qr);renderAdm();toast('已保存')}
 function saveRule(){_rule=document.getElementById('setRule').value;DB.set('rule',_rule);toast('已保存')}
 function setStatus(id,s){const o=_orders.find(x=>x.id===id);if(o){o.status=s;saveOrders();renderAdm();renderMy()}}
-function exportData(){const d={users:_users,orders:_orders,total:_total,ref:_ref,qr:_qr,rule:_rule};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click();toast('已导出')}
+function exportData(){const d={users:_users,orders:_orders,total:_total,qr:_qr,rule:_rule};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click();toast('已导出')}
 
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
 function modal(h){document.getElementById('mbox').innerHTML='<span class="close" onclick="closeModal()">×</span>'+h;document.getElementById('modal').classList.add('on')}
