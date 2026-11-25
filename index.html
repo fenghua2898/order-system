@@ -3,813 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>球号订购系统</title>
+<title>旺仔牛奶更不好卖了</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#0f1420;--card:#1a2233;--card2:#232d42;--line:#2d3a52;
-  --txt:#e8edf5;--txt2:#93a2bd;--pri:#4f8cff;--pri2:#3b6fd4;
-  --ok:#2ecc71;--warn:#f5a623;--bad:#ff5a5f;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
-  background:linear-gradient(160deg,#0b0f1a,#141c2e);color:var(--txt);min-height:100vh;padding-bottom:90px}
-.wrap{max-width:720px;margin:0 auto;padding:0 12px}
-header{position:sticky;top:0;z-index:20;background:rgba(15,20,32,.92);backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--line);padding:12px 0 10px}
-.header-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
-header h1{font-size:18px;font-weight:700}
-header .sub{font-size:11px;color:var(--txt2);margin-top:2px}
-.tag{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--card2);color:var(--txt2);border:1px solid var(--line)}
-.tag.pri{background:rgba(79,140,255,.15);color:var(--pri);border-color:rgba(79,140,255,.35)}
-.tag.hot{background:rgba(255,90,95,.15);color:var(--bad);border-color:rgba(255,90,95,.3)}
-.btn{font-family:inherit;font-size:14px;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.15s;font-weight:600}
-.btn:active{transform:scale(.96)}
-.btn.primary{background:var(--pri);color:#fff}
-.btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
-.btn.danger{background:rgba(255,90,95,.15);color:var(--bad);border:1px solid rgba(255,90,95,.3)}
-.btn.sm{padding:6px 12px;font-size:12px;border-radius:8px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
-.section-tabs{display:flex;gap:8px;margin-bottom:10px}
-.section-tabs .stab{flex:1;text-align:center;padding:10px 0;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;
-  background:var(--card2);border:1px solid var(--line);color:var(--txt2);transition:.15s}
-.section-tabs .stab.on{background:var(--pri);color:#fff;border-color:var(--pri)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
-.ball{position:relative;aspect-ratio:1/1;border-radius:50%;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--line);
-  background:radial-gradient(circle at 32% 28%,#3a4a6b,#1c2538);transition:.15s;user-select:none}
-.ball:active{transform:scale(.92)}
-.ball .num{font-size:22px;font-weight:800;line-height:1}
-.ball .stk{font-size:9px;color:var(--txt2);margin-top:1px}
-.ball.out{opacity:.38;background:#1a1f2b;cursor:not-allowed}
-.ball.sel{border-color:var(--pri);box-shadow:0 0 0 3px rgba(79,140,255,.18)}
-.ball input[type="checkbox"]{position:absolute;top:4px;left:4px;width:16px;height:16px;accent-color:var(--pri);pointer-events:none}
-.ball.hot{border-color:rgba(255,90,95,.4);background:radial-gradient(circle at 32% 28%,#5a3040,#1c1528)}
-.ball.hot .num{color:#ff8a8e}
-.bar{position:sticky;top:56px;z-index:15;background:rgba(15,20,32,.9);backdrop-filter:blur(8px);
-  padding:8px 0;border-bottom:1px solid var(--line)}
-.bar-in{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-input,select,textarea{font-family:inherit;background:var(--card2);border:1px solid var(--line);
-  color:var(--txt);border-radius:9px;padding:9px 11px;font-size:14px;outline:none;width:100%}
-input:focus,select:focus,textarea:focus{border-color:var(--pri)}
-textarea{resize:vertical;min-height:80px}
-.search{flex:1;min-width:120px}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{flex:none;font-size:13px;padding:8px 14px;border-radius:10px;cursor:pointer;color:var(--txt2);
-  background:var(--card);border:1px solid var(--line);white-space:nowrap}
-.tab.on{background:var(--pri);color:#fff;border-color:var(--pri);font-weight:600}
-.view{display:none}.view.on{display:block}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;z-index:100;justify-content:center}
-.modal.show{display:flex}
-.modal .sheet{background:var(--bg);width:100%;max-width:720px;border-radius:18px 18px 0 0;
-  max-height:92vh;overflow:auto;padding:18px 16px 26px;animation:up .25s ease}
-@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal.center{align-items:center}
-.modal.center .sheet{border-radius:18px;max-width:400px;width:calc(100% - 32px)}
-.batch-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:2px solid var(--pri);
-  padding:12px 16px;display:none;align-items:center;gap:10px;z-index:200;box-shadow:0 -2px 10px rgba(0,0,0,.3);flex-wrap:wrap}
-.batch-bar.show{display:flex}
-.batch-bar .sc{font-size:13px;color:var(--pri);white-space:nowrap}
-.batch-bar .qty-input{width:60px;padding:6px 8px;border:1px solid var(--line);border-radius:4px;
-  text-align:center;background:var(--card2);color:var(--txt);font-size:15px}
-.batch-bar button{padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:14px;white-space:nowrap}
-.batch-bar .btn-submit{background:var(--pri);color:#fff}
-.batch-bar .btn-clear{background:var(--card2);color:var(--txt2);border:1px solid var(--line)}
-.list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.row{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
-.flex{display:flex;gap:8px;align-items:center}
-.flex.between{justify-content:space-between}
-.mono{font-family:"SF Mono",Consolas,monospace;font-size:12px}
-.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
-.badge.pending{background:rgba(245,166,35,.15);color:var(--warn)}
-.badge.paid{background:rgba(46,204,113,.15);color:var(--ok)}
-.badge.cancel{background:rgba(147,162,189,.15);color:var(--txt2)}
-.empty{text-align:center;color:var(--txt2);padding:30px 0;font-size:13px}
-.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;z-index:300;
-  background:rgba(0,0,0,.88);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;pointer-events:none;
-  transition:.2s;max-width:80%;text-align:center}
-.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.scroll{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-th{color:var(--txt2);font-size:11px;font-weight:600}
-.qrbox{width:230px;height:230px;margin:0 auto;border:2px dashed var(--line);border-radius:14px;
-  display:flex;align-items:center;justify-content:center;color:var(--txt2);font-size:12px;text-align:center;
-  background:var(--card2);overflow:hidden}
-.qrbox img{max-width:100%;max-height:100%}
-.hint{font-size:12px;color:var(--txt2);line-height:1.7;margin-top:8px}
-.kv{font-size:13px;color:var(--txt2);line-height:1.9}
-.kv b{color:var(--txt);font-weight:600}
-.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.gap8{gap:8px}
-.auth-toggle{display:flex;margin-bottom:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.auth-toggle button{flex:1;padding:10px;border:none;background:var(--card2);color:var(--txt2);font-size:14px;cursor:pointer;font-weight:600}
-.auth-toggle button.on{background:var(--pri);color:#fff}
-.mask{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250;display:none}
-.mask.show{display:block}
-
-.amt-wrap{grid-column:1/-1;display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:-2px 0 4px}
-.amt-lb{font-size:12px;color:var(--txt2);min-width:52px}
-.amt-in{flex:1;max-width:140px;text-align:right;font-size:15px;font-weight:700;color:var(--bad);padding:6px 9px;margin:0}
-.batch-bar .sub{font-size:12px;color:var(--txt2)}
-.closed-tip{display:none;margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,90,95,.12);
-  border:1px solid rgba(255,90,95,.35);color:#ff8a8e;font-size:13px;line-height:1.7}
-.closed-tip.show{display:block}
-.closed-tip b{color:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#f4f6fa;padding-bottom:80px;font-size:14px}
+.wrap{max-width:480px;margin:0 auto;padding:10px}
+.card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.title{font-weight:bold;margin-bottom:8px;font-size:16px}
+.small{font-size:12px;color:#888}
+.btn{display:block;width:100%;padding:10px;border:none;border-radius:8px;margin:4px 0;cursor:pointer;font-size:15px}
+.btn-purple{background:#6c5ce7;color:#fff}
+.btn-orange{background:#ff9f43;color:#fff}
+.btn-green{background:#27ae60;color:#fff}
+.btn-red{background:#e74c3c;color:#fff}
+.btn-gray{background:#95a5a6;color:#fff}
+.sm{padding:6px 10px;font-size:13px;border:none;border-radius:6px;cursor:pointer;margin:2px}
+.purple{background:#6c5ce7;color:#fff}
+.orange{background:#ff9f43;color:#fff}
+.green{background:#27ae60;color:#fff}
+.red{background:#e74c3c;color:#fff}
+.gray{background:#95a5a6;color:#fff}
+input{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin:4px 0;font-size:15px}
+.bar{position:fixed;bottom:0;left:0;width:100%;background:#fff;padding:10px;border-top:1px solid #eee;display:flex;justify-content:space-between;align-items:center;max-width:480px;margin:0 auto;right:0}
+.ball{display:inline-block;width:36px;height:36px;line-height:36px;text-align:center;border-radius:50%;margin:3px;font-size:14px;cursor:pointer;border:1px solid #ccc;background:#fff}
+.ball.sel-purple{background:#6c5ce7;color:#fff;border-color:#6c5ce7}
+.ball.sel-orange{background:#ff9f43;color:#fff;border-color:#ff9f43}
+.ball.locked{background:#eee;color:#aaa;border-color:#ddd;cursor:not-allowed}
+.tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:12px;margin:1px}
+.tag.ok{background:#d4edda;color:#155724}
+.tag.refund{background:#f8d7da;color:#721c24}
+.nav{display:flex;justify-content:space-around;background:#fff;padding:8px;position:fixed;bottom:0;width:100%;max-width:480px;left:50%;transform:translateX(-50%);border-top:1px solid #eee;z-index:99}
+.nav span{flex:1;text-align:center;padding:8px;cursor:pointer;font-size:13px}
+.mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:999}
+.pop{background:#fff;padding:20px;border-radius:10px;width:90%;max-width:320px}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="wrap header-row">
-    <div>
-      <h1>⚽ 球号订购</h1>
-      <div class="sub">普通球 1~60 · 特价球 1~15</div>
-    </div>
-    <div id="headRight"></div>
-  </div>
-</header>
-
-<div class="wrap">
-  <div id="ruleBanner" class="card" style="display:none"></div>
-
-  <div class="bar" id="toolBar">
-    <div class="bar-in">
-      <div class="search"><input id="kw" placeholder="🔍 搜球号"></div>
-      <select id="fltStock" style="width:auto">
-        <option value="all">全部</option>
-        <option value="in">有货</option>
-        <option value="out">缺货</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- 选购页 -->
-  <section class="view on" id="vShop">
-    <div class="section-tabs">
-      <div class="stab on" data-sec="normal">⚽ 普通球 (1~60)</div>
-      <div class="stab" data-sec="hot">🔥 特价球 (1~15)</div>
-    </div>
-    <div class="closed-tip" id="closedTip"></div>
-    <div class="card">
-      <div class="grid" id="ballGrid"></div>
-    </div>
-  </section>
-
-  <!-- 我的订单 -->
-  <section class="view" id="vMy">
-    <div class="tabs">
-      <div class="tab on" data-f="all">全部</div>
-      <div class="tab" data-f="pending">待支付</div>
-      <div class="tab" data-f="paid">已收款</div>
-      <div class="tab" data-f="cancel">已取消</div>
-      <div class="tab" data-f="refund">已退款</div>
-    </div>
-    <div id="myList"></div>
-  </section>
-
-  <!-- 后台 -->
-  <section class="view" id="vAdmin">
-    <div id="adminGate"></div>
-    <div id="adminMain" style="display:none">
-      <div class="tabs" id="adminTabs">
-        <div class="tab on" data-a="ov">概览</div>
-        <div class="tab" data-a="orders">订单管理</div>
-        <div class="tab" data-a="goods">商品统计</div>
-        <div class="tab" data-a="rule">规则说明</div>
-        <div class="tab" data-a="qr">收款码</div>
-        <div class="tab" data-a="users">用户</div>
-      </div>
-      <div id="adminBody"></div>
-    </div>
-  </section>
-
-  <!-- 登录/注册 -->
-  <section class="view" id="vAuth">
-    <div class="card">
-      <div class="auth-toggle">
-        <button id="authTabLogin" class="on">登录</button>
-        <button id="authTabReg">注册</button>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <input placeholder="账号" id="fUser">
-        <input placeholder="密码" id="fPwd" type="password">
-        <input placeholder="昵称（注册时填）" id="fNick" style="display:none">
-      </div>
-      <button class="btn primary" style="width:100%;margin-top:14px" id="btnAuth">登录</button>
-    </div>
-  </section>
-
-  <!-- 我的 -->
-  <section class="view" id="vMe">
-    <div class="card">
-      <div style="font-weight:700;margin-bottom:12px">👤 我的</div>
-      <div class="kv" id="meInfo"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700;margin-bottom:10px">🧾 我的收款码（退款用）</div>
-      <div class="hint">上传你的收款码，这样需要退款时卖家能扫码转给你。</div>
-      <div class="qrbox mt12" id="myQrBox">暂无收款码</div>
-      <input type="file" id="myQrFile" accept="image/*" style="margin-top:12px">
-      <div class="flex gap8 mt12">
-        <button class="btn primary" id="myQrUp">上传</button>
-        <button class="btn ghost" id="myQrClr">删除</button>
-      </div>
-    </div>
-    <button class="btn danger" style="width:100%;margin-top:12px" id="btnLogout">退出登录</button>
-  </section>
+<div class="wrap" id="app"></div>
+<div class="nav" id="nav" style="display:none">
+  <span onclick="go('buy')">🛒选购</span>
+  <span onclick="go('my')">📋我的</span>
+  <span onclick="go('adm')" id="admNav" style="display:none">⚙️后台</span>
 </div>
-
-<!-- 批量下单栏 -->
-<div class="batch-bar" id="batchBar">
-<span class="sc" id="selectedCount">已选 0 个</span><span class="sub">合计</span><b style="color:var(--bad);font-size:16px">¥<span id="totalAmt">0.00</span></b><span class="sub">/ <span id="totalCnt">0</span>个号</span>
-  <span style="font-size:13px;color:var(--txt2)">数量：</span>
-  <input class="qty-input" id="batchQty" type="number" min="1" max="100" value="1">
-  <button class="btn-submit" id="btnSubmitBatch">提交订单</button>
-  <button class="btn-clear" id="btnClearSel">清空</button>
-</div>
-
-<!-- 支付弹窗 -->
-<div class="modal center" id="mPay">
-  <div class="sheet">
-    <div style="text-align:center">
-      <div style="font-weight:700;font-size:16px">扫码支付</div>
-      <div class="sub">订单 <span class="mono" id="payNo"></span></div>
-      <div class="sub" id="payDate"></div>
-      <div class="qrbox" id="qrBox"><div>收款码<br>请等待管理员设置</div></div>
-      <div class="sub" style="margin-top:10px">支付完成后点击下方按钮通知卖家确认</div>
-      <button class="btn primary" style="width:100%;margin-top:14px" id="btnPaid">我已支付，等待确认</button>
-      <button class="btn ghost" style="width:100%;margin-top:8px" id="btnPayLater">稍后再付</button>
-    </div>
-  </div>
-</div>
-
-<!-- 下单人收款码弹窗 -->
-<div class="modal center" id="mBuyerQr">
-  <div class="sheet">
-    <div style="text-align:center">
-      <div style="font-weight:700;font-size:16px">🧾 下单人收款码</div>
-      <div class="sub" id="buyerName"></div>
-      <div class="qrbox" id="buyerQrBox"></div>
-      <button class="btn ghost" style="width:100%;margin-top:14px" id="btnCloseBuyerQr">关闭</button>
-    </div>
-  </div>
-</div>
-
-<nav style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(15,20,32,.96);border-top:1px solid var(--line)">
-  <div class="wrap flex between" style="padding:8px 12px">
-    <div class="tab navtab on" data-v="vShop" style="border:none">🏀<br><span style="font-size:10px">选购</span></div>
-    <div class="tab navtab" data-v="vMy" style="border:none">📦<br><span style="font-size:10px">订单</span></div>
-    <div class="tab navtab" data-v="vAdmin" id="navAdmin" style="border:none;display:none">🔧<br><span style="font-size:10px">后台</span></div>
-    <div class="tab navtab" data-v="vMe" id="navMe" style="border:none">👤<br><span style="font-size:10px" id="meLabel">未登录</span></div>
-  </div>
-</nav>
-
-<div class="toast" id="toast"></div>
+<div class="mask" id="mask"><div class="pop" id="pop"></div></div>
 
 <script>
-'use strict';
-const DB={get(k,d){try{return JSON.parse(localStorage.getItem('ball_'+k))||d}catch(e){return d}},set(k,v){localStorage.setItem('ball_'+k,JSON.stringify(v))}};
-const $=s=>document.querySelector(s);
-const on=(el,ev,fn)=>{const e=typeof el==='string'?$(el):el;e&&e.addEventListener(ev,fn)};
-const show=s=>$(s).classList.add('show');
-const hide=s=>$(s).classList.remove('show');
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
-const WEEK=['周日','周一','周二','周三','周四','周五','周六'];
-const pad=n=>String(n).padStart(2,'0');
-function fmtTime(ts){const d=new Date(ts);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`}
-// 下单日期：2026-11-25 周三 14:30
-function fmtDate(ts){const d=new Date(ts);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${WEEK[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`}
-// 只显示日期：2026-11-25 周三
-function fmtDay(ts){const d=new Date(ts);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${WEEK[d.getDay()]}`}
-function key(sec,no){return sec+'-'+no}
+// ===== 防白屏兜底 =====
+window.onerror = function(msg){ console.error(msg); document.getElementById('app').innerHTML = '<div class="card"><b>页面出错：</b>'+msg+'<br><button class="btn btn-red" onclick="resetAll()">清空数据重置</button></div>'; return true; };
 
-// ===== 下单时间限制（每天 CLOSE_HOUR 点后停止接单）=====
-const CLOSE_HOUR=21;
-function closeCfg(){return DB.get('closeHour',{hour:CLOSE_HOUR,on:true})}
-function nextOpenText(){const c=closeCfg();const d=new Date();const t=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);return `${t.getMonth()+1}月${t.getDate()}日 ${WEEK[t.getDay()]} 00:00`}
-// 是否处于停接单状态
-function isClosed(){const c=closeCfg();if(!c.on)return false;const d=new Date();const v=d.getHours()*60+d.getMinutes();const h=DB.get('openHour',0);return v>=(c.hour*60)&&v<(h*60)}
-function closeTip(){const c=closeCfg();return `今日 ${c.hour}:00 已停止接单，明天 00:00 恢复（${nextOpenText()}）`}
-function guardOpen(){if(isClosed()){toast(closeTip());return false}return true}
+// ===== 安全存储 =====
+const DB = {
+  get(k, d) { try { let v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+};
+function resetAll(){ if(confirm('确定清空所有本地数据？')){ localStorage.clear(); location.reload(); } }
 
 // ===== 数据 =====
-let _me=DB.get('me',null);
-let _goods=DB.get('goods',null);
-if(!_goods){_goods=[];for(let i=1;i<=60;i++)_goods.push({no:i,section:'normal',stock:200});for(let i=1;i<=15;i++)_goods.push({no:i,section:'hot',stock:200});DB.set('goods',_goods)}
-let _orders=DB.get('orders',[]);
-let _users=DB.get('users',[]);
-let _admins=DB.get('admins',[]);
-let _rule=localStorage.getItem('ball_rule')||'';
-let _adminOn=DB.get('adminOn',false);
-let _myQr=localStorage.getItem('ball_myqr_'+( _me?_me.acc:'' ))||'';
+let U = DB.get('users', []);
+let O = DB.get('orders', []);
+let M = DB.get('me', null);
+let QR = DB.get('qr', '');
+let QR_REFUND = DB.get('qrRefund', '');
+let RULE = DB.get('rule', '下单后不可更改');
+let CLOSE_H = DB.get('closeH', 21);
+let CLOSE_ON = DB.get('closeOn', true);
+let SPEC = DB.get('specNos', [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
+let TOTAL_BALLS = 60;
 
-function good(no,sec){return _goods.find(g=>g.no===no&&g.section===sec)}
-function isAdmin(acc){return _admins.includes(acc)}
-function rqKey(acc){return 'ball_rq_'+acc}
-function myRq(){return _me?(localStorage.getItem(rqKey(_me.acc))||''):''}
-function rqTag(url){return url?'<span class="badge paid">已上传收款码</span>':'<span class="badge cancel">未上传收款码</span>'}
-function rqImgBox(id,url,tip){return '<div class="qrbox" id="'+id+'">'+(url?('<img src="'+url+'" alt="收款码">'):(tip||'暂无收款码'))+'</div>'}
-function saveGoods(){DB.set('goods',_goods)}
-function saveOrders(){DB.set('orders',_orders)}
-function saveUsers(){DB.set('users',_users)}
-function saveAdmins(){DB.set('admins',_admins)}
-function refreshMyQr(){_myQr=localStorage.getItem('ball_myqr_'+( _me?_me.acc:'' ))||''}
+let selNorm = new Set(), selSpec = new Set();
+let amtNorm = '', amtSpec = '';
 
-let SECTION='normal', SEL=new Set(), FILTER={kw:'',stock:'all'};
+// ===== 工具 =====
+const $ = id => document.getElementById(id);
+const fmt = t => { let d=new Date(t); return d.getMonth()+1+'/'+d.getDate()+' '+['日','一','二','三','四','五','六'][d.getDay()]+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); };
+const isSpec = n => SPEC.includes(Number(n));
+const save = () => { DB.set('users',U); DB.set('orders',O); DB.set('me',M); DB.set('qr',QR); DB.set('qrRefund',QR_REFUND); DB.set('rule',RULE); DB.set('closeH',CLOSE_H); DB.set('closeOn',CLOSE_ON); DB.set('specNos',SPEC); };
+const toast = m => { let t=document.createElement('div'); t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:6px;z-index:9999'; t.innerText=m; document.body.appendChild(t); setTimeout(()=>t.remove(),1500); };
 
-// ===== 球号渲染 =====
-function renderClosedTip(){
-  const t=$('#closedTip');if(!t)return;
-  if(isClosed()){t.classList.add('show');t.innerHTML='🚫 <b>'+closeTip()+'</b><br>当前只能浏览球号，无法提交新订单。';}
-  else{t.classList.remove('show');t.innerHTML='';}
-  const b=$('#btnSubmitBatch');if(b)b.style.display=isClosed()?'none':'';
-}
-function renderBalls(){
-  renderClosedTip();
-  const kw=FILTER.kw.trim();
-  const list=_goods.filter(g=>{
-    if(g.section!==SECTION)return false;
-    if(FILTER.stock==='in'&&g.stock<=0)return false;
-    if(FILTER.stock==='out'&&g.stock>0)return false;
-    if(kw&&!String(g.no).includes(kw))return false;
-    return true;
-  });
-  const box=$('#ballGrid');
-  box.innerHTML='';
-  if(!list.length){box.innerHTML='<div class="empty" style="grid-column:1/-1">没有符合条件的球号</div>';updateBatchBar();return}
-  list.forEach(g=>{
-    const d=document.createElement('div');
-    d.className='ball'+(g.stock<=0?' out':'')+(SEL.has(key(g.section,g.no))?' sel':'')+(g.section==='hot'?' hot':'');
-    d.dataset.sec=g.section;d.dataset.no=g.no;
-    const k=key(g.section,g.no);
-    d.innerHTML=`<input type="checkbox" ${SEL.has(k)?'checked':''}><div class="num">${g.no}</div><div class="stk">库存${g.stock}</div>`;
-    d.onclick=()=>{
-      if(g.stock<=0)return;
-      if(isClosed()){toast(closeTip());return}
-      const k=key(g.section,g.no);
-      if(SEL.has(k))SEL.delete(k);else SEL.add(k);
-      renderBalls();
-    };
-    box.appendChild(d);
-    if(SEL.has(k)){
-      const w=document.createElement('div');w.className='amt-wrap';
-      w.innerHTML='<span class="amt-lb">'+g.no+'号金额</span><input class="amt-in" data-k="'+k+'" type="number" min="0" step="0.01" placeholder="¥" inputmode="decimal">';
-      const inp=w.querySelector('input');
-      inp.oninput=updateTotal;
-      box.appendChild(w);
-      if(SEL.size===1)setTimeout(()=>inp.focus(),30);
-    }
-  });
-  updateBatchBar();
-}
-function updateTotal(){
-  let t=0;document.querySelectorAll('.amt-in').forEach(el=>{t+=parseFloat(el.value)||0});
-  const el=$('#totalAmt');if(el)el.textContent=t.toFixed(2);
-  const c=$('#totalCnt');if(c)c.textContent=SEL.size;
-}
-function updateBatchBar(){updateTotal();
-  const bar=$('#batchBar');
-  $('#selectedCount').textContent='已选 '+SEL.size+' 个';
-  bar.className='batch-bar'+(SEL.size>0?' show':'');
-}
-function clearSel(){SEL.clear();renderBalls()}
+function lockedNos(){ return O.filter(o=>o.status!=='取消'&&o.status!=='已退款').flatMap(o=>o.items.map(i=>i.no)); }
 
-// ===== 下单 =====
-function amtOf(no,sec){const el=document.querySelector('.amt-in[data-k="'+sec+'-'+no+'"]');return el?(parseFloat(el.value)||0):0}
-function submitBatch(){
-  if(!_me){toast('请先登录');go('vAuth');return}
-  if(!guardOpen()){renderBalls();return}
-  const qty=parseInt($('#batchQty').value)||1;
-  if(qty<1||qty>100)return toast('数量需在 1~100 之间');
-  if(SEL.size===0)return toast('请先选择球号');
-  const items=[];
-  for(const k of SEL){
-    const parts=k.split('-');const sec=parts[0];const no=+parts[1];
-    const g=good(no,sec);
-    if(!g||g.stock<qty)return toast((sec==='hot'?'特价':'')+no+'号库存不足（剩'+ (g?g.stock:0) +'）');
-    const a=amtOf(no,sec);
-    items.push(a>0?{no,qty,section:sec,amt:a}:{no,qty,section:sec});
+// ===== 路由 =====
+function go(p){
+  $('nav').style.display = M ? 'flex' : 'none';
+  if(p==='buy') renderBuy();
+  else if(p==='my') renderMy();
+  else if(p==='adm') renderAdm();
+}
+function afterLogin(){ $('nav').style.display='flex'; $('admNav').style.display = M.acc==='fenghua2898'?'inline':'none'; go('buy'); }
+
+// ===== 登录注册 =====
+function renderAuth(){
+  $('nav').style.display='none';
+  $('app').innerHTML = `
+    <div class="card"><div class="title">🔐 登录/注册</div>
+      <input id="acc" placeholder="账号"><input id="pwd" type="password" placeholder="密码"><input id="nick" placeholder="昵称（注册必填）">
+      <button class="btn btn-purple" onclick="login()">登录</button>
+      <button class="btn btn-green" onclick="reg()">注册</button>
+      <button class="sm red" onclick="resetAll()" style="margin-top:8px">⚠️重置系统（清数据）</button>
+    </div>`;
+}
+function reg(){
+  let a=$('acc').value.trim(), p=$('pwd').value.trim(), n=$('nick').value.trim();
+  if(!a||!p||!n) return toast('都填上');
+  if(U.find(x=>x.acc===a)) return toast('账号已存在');
+  U.push({acc:a,pwd:p,nick:n}); save(); M={acc:a,nick:n}; toast('注册成功'); afterLogin();
+}
+function login(){
+  let a=$('acc').value.trim(), p=$('pwd').value.trim();
+  let u=U.find(x=>x.acc===a&&x.pwd===p);
+  if(!u) return toast('账号或密码错');
+  M={acc:u.acc,nick:u.nick}; save(); afterLogin();
+}
+
+// ===== 选购页（核心修复） =====
+function renderBuy(){
+  let locked = lockedNos();
+  let normBalls=[], specBalls=[];
+  for(let i=1;i<=TOTAL_BALLS;i++){
+    if(isSpec(i)) specBalls.push(i); else normBalls.push(i);
   }
-  items.forEach(it=>{const g=good(it.no,it.section);g.stock-=it.qty});
-  saveGoods();
-  const total=items.reduce((s,i)=>s+(i.amt!==undefined?i.amt:0),0);
-  const o={id:'B'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase(),
-    uid:_me.acc,uname:_me.nick,items,price:total,status:'pending',created:Date.now()};
-  _orders.unshift(o);saveOrders();
-  SEL.clear();renderBalls();
-  openPay(o);
-}
-
-// ===== 支付 =====
-let PENDING=null;
-function openPay(o){
-  PENDING=o;$('#payNo').textContent=o.id;$('#payDate').textContent='📅 下单时间：'+fmtDate(o.created);
-  const seller=localStorage.getItem('ball_qrcode');
-  $('#qrBox').innerHTML=seller?`<img src="${seller}" alt="收款码">`:'<div>收款码<br>请等待管理员设置</div>';
-  show('#mPay');
-}
-function closePay(){hide('#mPay');PENDING=null}
-function confirmPaid(){
-  if(PENDING){const o=_orders.find(x=>x.id===PENDING.id);if(o){o.status='paid';o.paidAt=Date.now()}saveOrders()}
-  closePay();toast('已提交，等待卖家确认收款');go('vMy');renderMy();
-}
-
-// ===== 订单卡片 =====
-function orderCard(o,mode){
-  const d=document.createElement('div');d.className='row';
-  const st={pending:'待支付',paid:'已收款',cancel:'已取消',refund:'已退款'}[o.status];
-  const bc={pending:'badge pending',paid:'badge paid',cancel:'badge cancel',refund:'badge cancel'}[o.status];
-  let acts='';
-  if(o.status==='pending'){
-    if(mode==='my'){acts+=`<button class="btn primary sm" data-a="pay">付款</button><button class="btn ghost sm" data-a="cancel">取消</button>`}
-    else {acts+=`<button class="btn primary sm" data-a="confirm">标记已收款</button><button class="btn ghost sm" data-a="buyer">👤 收款码</button>`}
-  } else if(o.status==='paid'){
-    if(mode==='admin')acts+=`<button class="btn ghost sm" data-a="buyer">👤 收款码</button>`;
-  } else if(o.status==='cancel'){
-    if(mode==='my')acts+=`<button class="btn danger sm" data-a="del">删除</button>`;
-  }
-  d.innerHTML=`
-    <div class="flex between" style="margin-bottom:8px">
-      <div><div class="mono">${o.id}</div><div class="sub">📅 下单：${fmtDate(o.created)}${o.paidAt?'<br>💰 收款：'+fmtDate(o.paidAt):''}${o.uname?'<br>'+esc(o.uname):''}</div></div>
-      <span class="${bc}">${st}</span>
-    </div>
-    <div class="kv">${o.items.map(i=>'<div>· '+(i.section==='hot'?'<span class="tag hot">特价</span> ':'')+i.no+'号 × <b>'+i.qty+'</b>'+(i.amt!==undefined?' · <b style="color:var(--bad)">¥'+i.amt.toFixed(2)+'</b>':'')+'</div>').join('')}</div>
-    <div class="flex between mt8"><span class="sub">合计</span><b style="color:var(--bad);font-size:16px">¥${o.price.toFixed(2)}</b></div>
-    ${mode==='my'&&(o.status==='paid')?`<button class="btn ghost sm mt8" data-a="myrq">${myRq()?'💰 出示我的收款码（退补款用）':'💰 上传收款码（退补款用）'}</button>`:''}
-    <div class="flex between mt12"><div></div><div class="flex gap8">${acts}</div></div>`;
-  d.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
-    const a=b.dataset.a;
-    if(a==='pay')openPay(o);
-    else if(a==='cancel'){const x=_orders.find(y=>y.id===o.id);if(x)x.status='cancel';saveOrders();renderMy();if(_adminOn)renderAdmin()}
-    else if(a==='confirm'){const x=_orders.find(y=>y.id===o.id);if(x){x.status='paid';x.paidAt=Date.now()}saveOrders();toast('已标记已收款');renderMy();renderBalls();if(_adminOn)renderAdmin()}
-    else if(a==='del'){_orders=_orders.filter(y=>y.id!==o.id);saveOrders();renderMy()}
-    else if(a==='myrq'){if(myRq())showRqModal('我的退补款收款码','把这个码截图发给卖家，卖家扫码退/补款给你',myRq());else pickRqImg(function(d){localStorage.setItem(rqKey(_me.acc),d);toast('收款码已保存');renderMy()})}
-    else if(a==='buyer')showBuyerQr(o);
+  
+  let h = `<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL_BALLS} 个）</div>`;
+  
+  // 特价球
+  h += `<div style="margin-bottom:10px"><b style="color:#ff9f43">🔥 特价球（${specBalls.length}个）</b><br>`;
+  specBalls.forEach(n=>{
+    let l=locked.includes(n), s=selSpec.has(n);
+    h += `<span class="ball ${l?'locked':s?'sel-orange':''}" ${l?'':`onclick="toggleSpec(${n})"`}>${n}</span>`;
   });
-  return d;
+  h += `</div>`;
+  
+  // 普通球
+  h += `<div><b style="color:#6c5ce7">⚪ 普通球（${normBalls.length}个）</b><br>`;
+  normBalls.forEach(n=>{
+    let l=locked.includes(n), s=selNorm.has(n);
+    h += `<span class="ball ${l?'locked':s?'sel-purple':''}" ${l?'':`onclick="toggleNorm(${n})"`}>${n}</span>`;
+  });
+  h += `</div>`;
+  
+  if(locked.length) h += `<div class="small" style="margin-top:8px">🔒 已下单锁定：${locked.join('、')}</div>`;
+  h += `</div>`;
+  
+  // 金额区
+  let total=0;
+  if(selNorm.size){
+    let a = parseFloat(amtNorm)||0;
+    total += selNorm.size*a;
+    h += `<div class="card"><b>⚪ 普通球已选 ${selNorm.size} 个</b><br><span class="small">${[...selNorm].sort((a,b)=>a-b).join('、')}</span><br>
+      <input type="text" inputmode="numeric" placeholder="每个金额" value="${amtNorm}" oninput="amtNorm=this.value.replace(/[^0-9.]/g,'').replace(/(\\..*?)\\./g,'$1');updateBar()" style="margin-top:6px">
+      <div class="small">小计：${selNorm.size} × ¥${a.toFixed(2)} = ¥${(selNorm.size*a).toFixed(2)}</div></div>`;
+  }
+  if(selSpec.size){
+    let a = parseFloat(amtSpec)||0;
+    total += selSpec.size*a;
+    h += `<div class="card"><b style="color:#ff9f43">🔥 特价球已选 ${selSpec.size} 个</b><br><span class="small">${[...selSpec].sort((a,b)=>a-b).join('、')}</span><br>
+      <input type="text" inputmode="numeric" placeholder="特价金额" value="${amtSpec}" oninput="amtSpec=this.value.replace(/[^0-9.]/g,'').replace(/(\\..*?)\\./g,'$1');updateBar()" style="margin-top:6px">
+      <div class="small">小计：${selSpec.size} × ¥${a.toFixed(2)} = ¥${(selSpec.size*a).toFixed(2)}</div></div>`;
+  }
+  
+  h += `<button class="btn btn-purple" onclick="showConfirm()" ${selNorm.size||selSpec.size?'':'disabled'}>确认下单</button>`;
+  h += `<button class="btn btn-gray" onclick="M=null;save();renderAuth()">退出登录</button>`;
+  
+  $('app').innerHTML = h;
+  $('bar').style.display = (selNorm.size||selSpec.size)?'flex':'none';
+  $('bar').innerHTML = `<span>合计 <b style="color:#e74c3c">¥${total.toFixed(2)}</b>（${selNorm.size+selSpec.size}个）</span><button class="btn-purple sm" onclick="showConfirm()">下单</button>`;
 }
 
-// ===== 下单人收款码 =====
-function showBuyerQr(o){
-  $('#buyerName').textContent=esc(o.uname||o.uid||'');
-  const qr=localStorage.getItem('ball_myqr_'+o.uid);
-  $('#buyerQrBox').innerHTML=qr?`<img src="${qr}" alt="下单人收款码">`:'<div>该用户<br>未上传收款码</div>';
-  show('#mBuyerQr');
+function toggleNorm(n){ if(lockedNos().includes(n))return; selNorm.has(n)?selNorm.delete(n):selNorm.add(n); renderBuy(); }
+function toggleSpec(n){ if(lockedNos().includes(n))return; selSpec.has(n)?selSpec.delete(n):selSpec.add(n); renderBuy(); }
+function updateBar(){ renderBuy(); }
+
+function showConfirm(){
+  let locked = lockedNos();
+  let items=[];
+  let aN = parseFloat(amtNorm)||0, aS = parseFloat(amtSpec)||0;
+  if(!aN && !aS) return toast('请填金额');
+  selNorm.forEach(n=>{ if(!locked.includes(n)) items.push({no:n,amt:aN,spec:false}); });
+  selSpec.forEach(n=>{ if(!locked.includes(n)) items.push({no:n,amt:aS,spec:true}); });
+  if(!items.length) return toast('没可选号码');
+  let total = items.reduce((s,i)=>s+i.amt,0);
+  let h = `<div class="title">确认下单</div><div>${items.map(i=>`<div>${i.spec?'🔥':'⚪'}${i.no} ￥${i.amt.toFixed(2)}</div>`).join('')}</div>
+    <div style="margin-top:8px"><b>总计：¥${total.toFixed(2)}</b></div>
+    <div class="small">${RULE}</div>
+    ${CLOSE_ON&&new Date().getHours()>=CLOSE_H?'<div class="red">⚠️ 已过 ${CLOSE_H}:00，今日停单</div>':''}
+    <button class="btn btn-green" onclick="doOrder(${JSON.stringify(items)},${total})">扫码付款提交</button>
+    <button class="btn btn-gray" onclick="$('mask').style.display='none'">返回</button>`;
+  $('pop').innerHTML=h; $('mask').style.display='flex';
+}
+function doOrder(items,total){
+  $('pop').innerHTML = `<div class="title">扫码付款</div>${QR?'<img src="'+QR+'" style="width:200px;height:200px;display:block;margin:0 auto"><div class="small">长按识别付款</div>':'<div class="red">管理员未设置收款码</div>'}
+    <button class="btn btn-purple" onclick="submitOrd(${JSON.stringify(items)},${total})">已付款，提交订单</button>
+    <button class="btn btn-gray" onclick="$('mask').style.display='none'">返回</button>`;
+}
+function submitOrd(items,total){
+  O.push({id:Date.now(),acc:M.acc,nick:M.nick,items,price:total,status:'待确认',time:Date.now()});
+  save(); selNorm.clear(); selSpec.clear(); amtNorm=''; amtSpec='';
+  $('mask').style.display='none'; toast('提交成功，等待确认'); go('my');
 }
 
 // ===== 我的订单 =====
-let MYF='all';
 function renderMy(){
-  if(!_me){$('#myList').innerHTML='<div class="empty">请先登录</div>';return}
-  const all=_orders.filter(o=>o.uid===_me.acc);
-  const f=all.filter(o=>MYF==='all'||(MYF==='refund'?o.status==='refund':o.status===MYF));
-  const rq=myRq();
-  let head=`<div class="card">
-    <div class="flex between" style="margin-bottom:6px"><div style="font-weight:700">💰 我的退补款收款码</div>${rqTag(rq)}</div>
-    <div class="hint" style="margin-top:0">卖家要退钱或补款给你时扫这个码。请上传<b>你自己</b>的收款码，图片只存在你自己的设备上。</div>
-    ${rqImgBox('myRqBox',rq,'还没上传')}
-    <input type="file" id="myRqFile" accept="image/*" style="margin-top:10px">
-    <div class="flex gap8 mt12">
-      <button class="btn primary sm" id="myRqUp">${rq?'更换收款码':'上传收款码'}</button>
-      ${rq?'<button class="btn ghost sm" id="myRqClr">删除</button>':''}
-      ${rq?'<button class="btn ghost sm" id="myRqShow">预览</button>':''}
-    </div>
-  </div>`;
-  $('#myList').innerHTML=head;
-  const box=document.createElement('div');
-  if(!all.length){box.innerHTML='<div class="empty">还没有订单</div>'}
-  else if(!f.length){box.innerHTML='<div class="empty">该状态下没有订单</div>'}
-  else f.forEach(o=>box.appendChild(orderCard(o,'my')));
-  $('#myList').appendChild(box);
-  on($('#myRqUp'),'click',()=>pickRqImg(function(data){localStorage.setItem(rqKey(_me.acc),data);toast('收款码已保存');renderMy()}));
-  const clr=$('#myRqClr'); if(clr)on(clr,'click',()=>{if(confirm('删除你的收款码？')){localStorage.removeItem(rqKey(_me.acc));renderMy();toast('已删除')}});
-  const sh=$('#myRqShow'); if(sh)on(sh,'click',()=>showRqModal('我的退补款收款码','把这个码截图发给卖家，卖家扫码退/补款给你',myRq()));
-}
-function pickRqImg(cb){
-  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
-  inp.onchange=function(){
-    const fl=inp.files[0];if(!fl)return;
-    if(fl.size>5*1024*1024)return toast('图片请小于5MB');
-    const r=new FileReader();
-    r.onload=function(e){const img=new Image();
-      img.onload=function(){const m=800,sc=Math.min(1,m/Math.max(img.width,img.height));
-        const c=document.createElement('canvas');c.width=img.width*sc;c.height=img.height*sc;
-        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-        cb(c.toDataURL('image/jpeg',.88));};
-      img.src=e.target.result};
-    r.readAsDataURL(fl);
-  };
-  inp.click();
-}
-function showRqModal(title,tip,url){
-  modal(`<div style="text-align:center"><div style="font-weight:700;font-size:16px">${title}</div>
-    <div class="sub" style="margin-top:6px">${tip}</div>
-    ${rqImgBox('rqModalBox',url,'该用户未上传收款码')}
-    <button class="btn ghost" style="width:100%;margin-top:12px" id="btnCloseRq">关闭</button></div>`);
-  on($('#btnCloseRq'),'click',closeModal);
-}
-function viewBuyerRq(uid,nick){showRqModal((nick||uid)+' 的收款码','扫这个码退/补款给该买家',localStorage.getItem(rqKey(uid)))}
-// ===== 后台 =====
-let AV='ov';
-function renderAdminGate(){
-  $('#adminGate').innerHTML=`
-    <div class="card">
-      <div style="font-weight:700">🔐 管理员登录</div>
-      <input id="fAdminPwd" type="password" placeholder="管理员密码" style="margin-top:10px">
-      <button class="btn primary" style="width:100%;margin-top:10px" id="btnAdminLogin">进入后台</button>
-      <div class="hint">提示：首个注册账号自动成为管理员；首次进入无需密码，可直接点进入。</div>
+  let mine = O.filter(o=>o.acc===M.acc);
+  let h = `<div class="card"><div class="title">📋 我的订单（${mine.length}）</div>`;
+  if(!mine.length) h+='<div class="small">暂无</div>';
+  mine.reverse().forEach(o=>{
+    h += `<div style="border:1px solid #eee;padding:8px;margin:6px 0;border-radius:8px">
+      <div style="display:flex;justify-content:space-between"><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':''}">${o.status}</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>
+      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} $${i.amt.toFixed(2)}</span>`).join('')}</div>
+      <div class="small">📅${fmt(o.time)}</div>
     </div>`;
-  on($('#btnAdminLogin'),'click',()=>{
-    const set=DB.get('adminPwd',null);
-    const pwd=$('#fAdminPwd').value;
-    if(set&&pwd!==set)return toast('密码错误');
-    if(_me&&!isAdmin(_me.acc))return toast('当前账号不是管理员');
-    _adminOn=true;DB.set('adminOn',true);
-    $('#adminGate').style.display='none';$('#adminMain').style.display='';
-    renderAdmin();
   });
+  h += `<button class="btn btn-gray" onclick="M=null;save();renderAuth()">退出</button></div>`;
+  $('app').innerHTML=h; $('bar').style.display='none';
 }
-function renderAdmin(){
-  if(!_adminOn)return;
-  const body=$('#adminBody');
-  if(AV==='ov'){
-    const paid=_orders.filter(o=>o.status==='paid');
-    const m={};paid.forEach(o=>o.items.forEach(i=>{const k=key(i.section,i.no);m[k]=(m[k]||0)+i.qty}));
-    const rank=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    body.innerHTML=`
-      <div class="flex between" style="flex-wrap:wrap">
-        <div class="card" style="flex:1;min-width:120px"><div class="sub">累计订单</div><div style="font-size:24px;font-weight:800">${_orders.length}</div></div>
-        <div class="card" style="flex:1;min-width:120px"><div class="sub">已收款</div><div style="font-size:24px;font-weight:800;color:var(--ok)">${paid.length}</div></div>
-        <div class="card" style="flex:1;min-width:120px"><div class="sub">待支付</div><div style="font-size:24px;font-weight:800;color:var(--warn)">${_orders.filter(o=>o.status==='pending').length}</div></div>
-      </div>
-      <div class="card"><div style="font-weight:700;margin-bottom:8px">🏆 球号销量榜</div>
-      ${rank.length?`<div class="scroll"><table><tr><th>排名</th><th>球号</th><th>类型</th><th>售出</th></tr>${rank.map((r,i)=>{const k=r[0],v=r[1];const p=k.split('-');return `<tr><td>${i+1}</td><td class="mono">${p[1]}号</td><td>${p[0]==='hot'?'<span class="tag hot">特价</span>':'普通'}</td><td><b>${v}</b></td></tr>`}).join('')}</table></div>`:'<div class="empty">暂无数据</div>'}</div>`;
-  }
-  else if(AV==='orders'){
-    const all=_orders;
-    const kw=($('#ofKw')?($('#ofKw').value||''):'').trim().toLowerCase();
-    const st=($('#ofSt')?$('#ofSt').value:'all');
-    const f=all.filter(o=>{
-      if(st!=='all'&&o.status!==st)return false;
-      if(!kw)return true;
-      if(o.id.toLowerCase().includes(kw))return true;
-      if((o.uname||'').toLowerCase().includes(kw))return true;
-      if(o.items.some(i=>String(i.no).includes(kw)))return true;
-      return false;
-    });
-    body.innerHTML=`<div class="hint">搜索订单号 / 昵称 / 球号</div>
-      <div class="flex gap8 mt12"><input id="ofKw" placeholder="🔍 搜索" value="${esc(kw)}">
-      <select id="ofSt" style="width:auto"><option value="all">全部</option><option value="pending">待支付</option><option value="paid">已收款</option><option value="cancel">已取消</option></select></div>
-      <div class="list mt12" id="adminOrderList"></div>`;
-    on($('#ofKw'),'input',()=>renderAdmin());
-    const ss=$('#ofSt');ss.value=st;on(ss,'change',()=>renderAdmin());
-    const list=$('#adminOrderList');
-    if(!f.length){list.innerHTML='<div class="empty">没有订单</div>';return}
-    f.forEach(o=>{
-      const d=document.createElement('div');d.className='row';
-      d.innerHTML=`<div class="flex between" style="margin-bottom:6px"><div><div class="mono">${o.id}</div><div class="sub">📅 ${fmtDate(o.created)}${o.paidAt?'<br>💰 收款：'+fmtDate(o.paidAt):''}<br>${esc(o.uname||'')}</div></div>
-        <span class="badge ${o.status==='paid'?'paid':o.status==='cancel'||o.status==='refund'?'cancel':'pending'}">${o.status==='paid'?'已收款':o.status==='cancel'?'已取消':o.status==='refund'?'已退款':'待支付'}</span></div>
-        <div class="kv" style="font-size:12px">${o.items.map(i=>'<span class="tag" style="margin:2px">'+(i.section==='hot'?'特价 ':'')+i.no+'号×'+i.qty+(i.amt!==undefined?' · ¥'+i.amt.toFixed(2):'')+'</span>').join('')}</div>
-        <div class="flex between mt8"><span class="sub">合计</span><b style="color:var(--bad)">¥${o.price.toFixed(2)}</b></div>
-        <div class="flex gap8 mt12" style="flex-wrap:wrap"><button class="btn primary sm" data-a="buyer" data-id="${o.id}">👤 我的收款码</button>${o.status==='pending'?`<button class="btn ghost sm" data-a="confirm" data-id="${o.id}">标记已收款</button>`:''}${o.status==='paid'?`<button class="btn ghost sm" data-a="refund" data-id="${o.id}">↩ 标记已退款</button>`:''}${localStorage.getItem(rqKey(o.uid))?`<button class="btn primary sm" data-a="brq" data-id="${o.id}">💰 买家收款码</button>`:'<span class="sub" style="font-size:11px;align-self:center">买家未传收款码</span>'}</div>`;
-      d.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
-        const a=b.dataset.a,id=b.dataset.id;
-        if(a==='buyer'){const o2=_orders.find(y=>y.id===id);if(o2)showBuyerQr(o2)}
-        else if(a==='confirm'){const o2=_orders.find(y=>y.id===id);if(o2){o2.status='paid';o2.paidAt=Date.now()}saveOrders();toast('已标记已收款');renderAdmin();renderBalls()}
-        else if(a==='refund'){const o2=_orders.find(y=>y.id===id);if(o2)o2.status='refund';saveOrders();toast('已标记退款，请扫买家收款码退补款');renderAdmin()}
-        else if(a==='brq'){const o2=_orders.find(y=>y.id===id);if(o2)viewBuyerRq(o2.uid,o2.uname)}
-      });
-      list.appendChild(d);
-    });
-  }
-  else if(AV==='goods'){
-    body.innerHTML=`<div class="card">
-      <div style="font-weight:700">🔍 球号下单统计查询</div>
-      <div class="flex gap8 mt12">
-        <select id="gfSec" style="width:auto"><option value="normal">普通球</option><option value="hot">特价球</option></select>
-        <input id="gfKw" placeholder="输入球号，如 2" style="flex:1">
-        <button class="btn primary sm" id="gfBtn">查询</button>
-      </div>
-      <div id="gfResult" class="mt12"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700">📦 全部库存</div>
-      <div class="scroll mt12"><table>
-        <tr><th>类型</th><th>球号</th><th>库存</th><th>下单量</th><th>已收款</th></tr>
-        ${_goods.map(g=>{const rel=_orders.filter(o=>o.items.some(i=>i.no===g.no&&i.section===g.section));const q=rel.reduce((s,o)=>s+o.items.filter(i=>i.no===g.no&&i.section===g.section).reduce((a,b)=>a+b.qty,0),0);const pq=rel.filter(o=>o.status==='paid').reduce((s,o)=>s+o.items.filter(i=>i.no===g.no&&i.section===g.section).reduce((a,b)=>a+b.qty,0),0);return `<tr><td>${g.section==='hot'?'<span class="tag hot">特价</span>':'普通'}</td><td class="mono">${g.no}号</td><td>${g.stock}</td><td>${q}</td><td style="color:var(--ok)">${pq}</td></tr>`}).join('')}
-      </table></div>
+
+// ===== 后台 =====
+function renderAdm(){
+  if(!M||M.acc!=='fenghua2898'){ go('buy'); return; }
+  let h = `<div class="card"><div class="title">⚙️ 后台（管理员）</div>
+    <div>订单数：${O.length} | 总额：¥${O.reduce((s,o)=>s+o.price,0).toFixed(2)}</div>
+    <div class="small" style="margin-top:8px">收款码URL</div><input id="qrI" value="${QR}"><button class="sm purple" onclick="QR=$('qrI').value;save();toast('✓')">保存</button>
+    <div class="small">特价球号（逗号分隔，默认1-15）</div><input id="spI" value="${SPEC.join(',')}"><button class="sm orange" onclick="SPEC=$('spI').value.split(',').map(Number).filter(n=>n);save();toast('✓')">保存</button>
+    <div class="small">停单时间</div><input id="clI" type="number" value="${CLOSE_H}"><label><input type="checkbox" id="clO" ${CLOSE_ON?'checked':''}>启用停单</label>
+    <button class="sm purple" onclick="CLOSE_H=parseInt($('clI').value);CLOSE_ON=$('clO').checked;save();toast('✓')">保存停单</button>
+    <h3 style="margin-top:10px">全部订单（${O.length}）</h3>`;
+  O.forEach(o=>{
+    h += `<div style="border:1px solid #eee;padding:6px;margin:4px 0;border-radius:6px">
+      <div style="display:flex;justify-content:space-between"><b>${o.nick}(${o.acc})</b><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':''}">${o.status}</span></div>
+      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} $${i.amt.toFixed(2)}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between"><span class="small">📅${fmt(o.time)}</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>
+      <button class="sm green" onclick="setSt(${o.id},'已确认')">收款</button>
+      <button class="sm red" onclick="setSt(${o.id},'取消')">取消</button>
+      <button class="sm gray" onclick="setSt(${o.id},'已退款')">退款</button>
     </div>`;
-    on($('#gfBtn'),'click',()=>{
-      const sec=$('#gfSec').value;const no=parseInt(($('#gfKw').value||'').trim());
-      if(!no)return toast('请输入球号');
-      const rel=_orders.filter(o=>o.items.some(i=>i.no===no&&i.section===sec));
-      const rows=rel.map(o=>({id:o.id,uname:o.uname,created:o.created,status:o.status,qty:o.items.find(i=>i.no===no&&i.section===sec).qty}));
-      const total=rows.reduce((s,r)=>s+r.qty,0),paid=rows.filter(r=>r.status==='paid').reduce((s,r)=>s+r.qty,0);
-      const g=good(no,sec);
-      $('#gfResult').innerHTML=`<div class="card">
-        <div class="flex between"><div><div style="font-weight:700">${sec==='hot'?'特价':'普通'} ${no}号</div><div class="sub">剩余库存 ${g?g.stock:0}</div></div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
-          <span class="tag">下单笔数 ${rows.length}</span><span class="tag">下单总量 ${total}</span><span class="tag pri">已收款 ${paid}</span>
-        </div></div>
-        ${rows.length?`<div class="scroll mt12"><table><tr><th>订单号</th><th>下单人</th><th>数量</th><th>状态</th><th>时间</th></tr>${rows.map(r=>`<tr><td class="mono" style="font-size:11px">${r.id}</td><td>${esc(r.uname||'')}</td><td><b>${r.qty}</b></td><td>${r.status==='paid'?'<span style="color:var(--ok)">已收</span>':r.status==='pending'?'<span style="color:var(--warn)">待付</span>':'<span style="color:var(--txt2)">取消</span>'}</td><td style="font-size:11px">${fmtTime(r.created)}</td></tr>`).join('')}</table></div>`:'<div class="empty">暂无下单记录</div>'}`;
-    });
-  }
-  else if(AV==='rule'){
-    body.innerHTML=`<div class="card">
-      <div style="font-weight:700">📝 规则说明</div>
-      <div class="hint">在这里写下订购规则，朋友在选购页顶部会看到。</div>
-      <textarea id="ruleText" placeholder="例如：每人限购、付款后不退、每周三开单..." style="margin-top:10px">${esc(_rule)}</textarea>
-      <div class="mt16" style="border-top:1px dashed var(--line);padding-top:12px">
-        <div style="font-weight:700">⏰ 每日截单时间</div>
-        <div class="hint">到点后买家<b>无法提交新订单</b>，第二天 00:00 自动恢复，无需手动开。</div>
-        <div class="flex gap8 mt12" style="align-items:center">
-          <label class="flex gap8" style="font-size:13px;cursor:pointer"><input type="checkbox" id="closeOn" style="width:auto" ${c.on?'checked':''}> 开启限制</label>
-          <span style="font-size:13px;color:var(--txt2)">每天</span>
-          <select id="closeHour" style="width:auto">
-            ${Array.from({length:24},(_,h)=>`<option value="${h}" ${h===c.hour?'selected':''}>${pad(h)}:00</option>`).join('')}
-          </select>
-          <span style="font-size:13px;color:var(--txt2)">后停接单</span>
-        </div>
-        <div class="hint">当前状态：<b style="color:${isClosed()?'#ff8a8e':'var(--ok)'}">${isClosed()?'已停接单（'+closeTip()+'）':'开放接单中'}</b></div>
-      </div>
-      <div class="flex gap8 mt12">
-        <button class="btn primary" id="ruleSave">保存</button>
-        <button class="btn ghost" id="ruleClear">清空</button>
-      </div>
-    </div>`;
-    const c=closeCfg();
-    on($('#ruleSave'),'click',()=>{
-      _rule=$('#ruleText').value;localStorage.setItem('ball_rule',_rule);
-      const h=parseInt($('#closeHour').value);
-      const on=$('#closeOn').checked;
-      if(h>=0&&h<=23)DB.set('closeHour',{hour:h,on:on});
-      renderRuleBanner();renderClosedTip();toast('规则与截单时间已保存');
-    });
-    on($('#ruleClear'),'click',()=>{$('#ruleText').value='';_rule='';localStorage.removeItem('ball_rule');renderRuleBanner();toast('已清空')});
-  }
-  else if(AV==='qr'){
-    const stored=localStorage.getItem('ball_qrcode');
-    body.innerHTML=`<div class="card">
-      <div style="font-weight:700">📷 收款码设置（卖给朋友的收款码）</div>
-      <div class="qrbox mt12" id="qrPrev">${stored?`<img src="${stored}">`:'暂无收款码'}</div>
-      <input type="file" id="qrFile" accept="image/*" style="margin-top:12px">
-      <div class="flex gap8 mt12"><button class="btn primary" id="qrUp">上传并保存</button><button class="btn ghost" id="qrClr">清除</button></div>
-    </div>`;
-    on($('#qrUp'),'click',()=>{const f=$('#qrFile').files[0];if(!f)return toast('请先选图');const r=new FileReader();r.onload=e=>{localStorage.setItem('ball_qrcode',e.target.result);toast('收款码已保存');renderAdmin()};r.readAsDataURL(f)});
-    on($('#qrClr'),'click',()=>{localStorage.removeItem('ball_qrcode');toast('已清除');renderAdmin()});
-  }
-  else if(AV==='users'){
-    body.innerHTML=`<div class="card">
-      <div style="font-weight:700">👥 用户管理（${_users.length}）</div>
-      <div class="scroll mt12"><table><tr><th>账号</th><th>昵称</th><th>身份</th><th>操作</th></tr>
-      ${_users.map(u=>{const a=isAdmin(u.acc);return `<tr><td>${esc(u.acc)}</td><td>${esc(u.nick||'-')}</td><td>${a?'<span class="badge paid">管理员</span>':'普通'}</td><td><button class="btn sm ${a?'ghost':'primary'}" data-ua="${esc(u.acc)}" data-v="${a?0:1}">${a?'降为普通':'升为管理员'}</button></td></tr>`}).join('')}
-      </table></div>
-      <div class="flex gap8 mt12"><button class="btn primary" id="expBtn">导出备份</button><button class="btn ghost" id="impBtn">导入恢复</button></div>
-      <input type="file" id="impFile" accept=".json" style="display:none">
-      <div style="margin-top:12px"><div class="sub">管理员密码</div><input id="newAdminPwd" placeholder="留空不修改" style="margin-top:6px"><button class="btn ghost sm mt8" id="saveAdminPwd">设置密码</button></div>
-      <button class="btn danger" style="width:100%;margin-top:12px" id="logoutAdmin">退出后台</button>
-    </div>`;
-    body.querySelectorAll('[data-ua]').forEach(b=>b.onclick=()=>{
-      const acc=b.dataset.ua;const v=+b.dataset.v;
-      if(v){if(!_admins.includes(acc))_admins.push(acc)}else{const i=_admins.indexOf(acc);if(i>-1)_admins.splice(i,1)}
-      if(_admins.length===0)return toast('至少保留一个管理员');
-      saveAdmins();toast('已更新');renderAdmin();refreshNav();
-    });
-    on($('#expBtn'),'click',()=>{const d={goods:_goods,orders:_orders,users:_users,admins:_admins,rule:_rule,qrcode:localStorage.getItem('ball_qrcode'),closeHour:DB.get('closeHour',null)};const b=new Blob([JSON.stringify(d)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup.json';a.click()});
-    on($('#impBtn'),'click',()=>$('#impFile').click());
-    on($('#impFile'),'change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=t=>{const d=JSON.parse(t.target.result);if(d.goods){_goods=d.goods;saveGoods()}if(d.orders){_orders=d.orders;saveOrders()}if(d.users){_users=d.users;saveUsers()}if(d.admins){_admins=d.admins;saveAdmins()}if(d.rule!==undefined){_rule=d.rule;if(_rule)localStorage.setItem('ball_rule',_rule);else localStorage.removeItem('ball_rule')}if(d.closeHour){DB.set('closeHour',d.closeHour)}if(d.qrcode!==undefined){if(d.qrcode)localStorage.setItem('ball_qrcode',d.qrcode);else localStorage.removeItem('ball_qrcode')}toast('已恢复');renderBalls();renderRuleBanner();if(_adminOn)renderAdmin()};r.readAsText(f)});
-    on($('#saveAdminPwd'),'click',()=>{const v=$('#newAdminPwd').value;if(v){DB.set('adminPwd',v);toast('密码已设置')}else toast('留空不修改')});
-    on($('#logoutAdmin'),'click',()=>{_adminOn=false;DB.set('adminOn',false);$('#adminGate').style.display='';$('#adminMain').style.display='none';renderAdminGate();refreshNav();go('vShop')});
-  }
+  });
+  h += `<button class="btn btn-green" onclick="exportData()">📦 导出备份</button>
+        <button class="btn btn-red" onclick="importData()">📥 导入备份</button>
+        <button class="btn btn-gray" onclick="M=null;save();renderAuth()">退出</button></div>`;
+  $('app').innerHTML=h; $('bar').style.display='none';
 }
+function setSt(id,s){ let o=O.find(x=>x.id===id); if(o){ o.status=s; if(s==='已确认')o.paidAt=Date.now(); save(); renderAdm(); renderMy(); } }
+function exportData(){ const d={users:U,orders:O,qr:QR,qrRefund:QR_REFUND,rule:RULE,closeH:CLOSE_H,closeOn:CLOSE_ON,specNos:SPEC}; const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup.json'; a.click(); }
+function importData(){ let i=document.createElement('input'); i.type='file'; i.onchange=e=>{ let f=e.target.files[0]; let r=new FileReader(); r.onload=ev=>{ try{ let d=JSON.parse(ev.target.result); U=d.users||U; O=d.orders||O; QR=d.qr||QR; SPEC=d.specNos||SPEC; save(); toast('导入成功'); renderAdm(); }catch(err){toast('文件错误')} }; r.readAsText(f); }; i.click(); }
 
-// ===== 规则横幅 =====
-function renderRuleBanner(){
-  const b=$('#ruleBanner');
-  if(_rule.trim()){b.style.display='';b.innerHTML=`<div style="font-weight:700;margin-bottom:6px">📌 订购规则</div><div class="hint" style="margin:0;white-space:pre-wrap">${esc(_rule)}</div>`}
-  else b.style.display='none';
+// ===== 启动 =====
+try{
+  if(M) afterLogin(); else renderAuth();
+}catch(e){
+  console.error(e);
+  $('app').innerHTML = '<div class="card"><b>初始化失败</b><br>'+e.message+'<br><button class="btn btn-red" onclick="resetAll()">清空数据重置</button></div>';
 }
-
-// ===== 登录/注册 =====
-let AUTH='login';
-function setAuthMode(m){
-  AUTH=m;
-  $('#authTabLogin').classList.toggle('on',m==='login');
-  $('#authTabReg').classList.toggle('on',m==='register');
-  $('#btnAuth').textContent=m==='login'?'登录':'注册';
-  $('#fNick').style.display=m==='login'?'none':'block';
-}
-function doAuth(){
-  const acc=($('#fUser').value||'').trim(),pwd=($('#fPwd').value||''),nick=($('#fNick').value||'').trim();
-  if(!acc||!pwd)return toast('账号密码必填');
-  if(AUTH==='login'){
-    const u=_users.find(x=>x.acc===acc&&x.pwd===pwd);
-    if(!u)return toast('账号或密码错误');
-    _me={acc,pwd,nick:u.nick};DB.set('me',_me);afterLogin();toast('登录成功');
-  }else{
-    if(_users.find(x=>x.acc===acc))return toast('账号已存在');
-    if(!nick)return toast('昵称必填');
-    _users.push({acc,pwd,nick});saveUsers();
-    if(_users.length===1){_admins.push(acc);saveAdmins();_adminOn=true;DB.set('adminOn',true)}
-    _me={acc,pwd,nick};DB.set('me',_me);
-    toast(_users.length===1?'注册成功，你已成为管理员':'注册成功');
-    afterLogin();
-  }
-}
-function afterLogin(){
-  $('#fUser').value='';$('#fPwd').value='';$('#fNick').value='';
-  refreshMyQr();
-  refreshNav();
-  if(_adminOn&&isAdmin(_me.acc)){renderAdmin()}else{$('#adminGate').style.display='';$('#adminMain').style.display='none';renderAdminGate()}
-  renderMe();
-  go('vShop');
-}
-function logout(){
-  _me=null;DB.set('me',null);_myQr='';refreshNav();renderMe();
-  $('#meLabel').textContent='未登录';
-  toast('已退出登录');
-  go('vShop');
-}
-
-// ===== 我的页面 =====
-function renderMe(){
-  if(!_me){$('#meInfo').innerHTML='<div class="empty" style="padding:10px 0">请先登录</div>';return}
-  $('#meInfo').innerHTML=`<div>昵称：<b>${esc(_me.nick)}</b></div><div>账号：<b>${esc(_me.acc)}</b></div>${isAdmin(_me.acc)?'<div>身份：<span class="badge paid">管理员</span></div>':''}`;
-  const qr=localStorage.getItem('ball_myqr_'+_me.acc);
-  $('#myQrBox').innerHTML=qr?`<img src="${qr}">`:'暂无收款码';
-}
-
-// ===== 导航 =====
-function refreshNav(){
-  if(_me){$('#meLabel').textContent=_me.nick||_me.acc;$('#headRight').innerHTML=`<span class="tag pri">${esc(_me.nick||_me.acc)}</span>`}
-  else{$('#meLabel').textContent='未登录';$('#headRight').innerHTML=''}
-  $('#navMe').style.display='';
-  $('#navAdmin').style.display=(_me&&(isAdmin(_me.acc)||_adminOn))?'':'none';
-}
-function go(v){
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
-  document.querySelectorAll('.navtab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));
-  if(v==='vShop'){$('#vShop').classList.add('on');renderBalls()}
-  else if(v==='vMy'){$('#vMy').classList.add('on');renderMy()}
-  else if(v==='vAdmin'){$('#vAdmin').classList.add('on');if(_adminOn&&isAdmin(_me.acc)){$('#adminGate').style.display='none';$('#adminMain').style.display=''}else{$('#adminGate').style.display='';$('#adminMain').style.display='none';renderAdminGate()}renderAdmin()}
-  else if(v==='vMe'){$('#vMe').classList.add('on');renderMe()}
-  else if(v==='vAuth'){$('#vAuth').classList.add('on');setAuthMode('login')}
-  window.scrollTo(0,0);
-}
-
-// ===== 初始化 =====
-function init(){
-  // 搜索/筛选
-  on($('#kw'),'input',e=>{FILTER.kw=e.target.value;renderBalls()});
-  on($('#fltStock'),'change',e=>{FILTER.stock=e.target.value;renderBalls()});
-  // 分区切换
-  document.querySelectorAll('.stab').forEach(t=>on(t,'click',()=>{
-    document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-    SECTION=t.dataset.sec;SEL.clear();renderBalls();
-  }));
-  // 导航
-  document.querySelectorAll('.navtab').forEach(t=>on(t,'click',()=>{
-    const v=t.dataset.v;
-    if(v==='vMe'&&!_me){go('vAuth');return}
-    if(v==='vAdmin'&&!_me){toast('请先登录');go('vAuth');return}
-    go(v);
-  }));
-  // 我的订单 tab
-  document.querySelectorAll('#vMy .tab').forEach(t=>on(t,'click',()=>{
-    document.querySelectorAll('#vMy .tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-    MYF=t.dataset.f;renderMy();
-  }));
-  // 后台 tab
-  document.querySelectorAll('#adminTabs .tab').forEach(t=>on(t,'click',()=>{
-    document.querySelectorAll('#adminTabs .tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
-    AV=t.dataset.a;renderAdmin();
-  }));
-  // 登录注册
-  on($('#authTabLogin'),'click',()=>setAuthMode('login'));
-  on($('#authTabReg'),'click',()=>setAuthMode('register'));
-  on($('#btnAuth'),'click',doAuth);
-  // 批量下单
-  on($('#btnSubmitBatch'),'click',submitBatch);
-  on($('#btnClearSel'),'click',clearSel);
-  // 支付
-  on($('#btnPaid'),'click',confirmPaid);
-  on($('#btnPayLater'),'click',closePay);
-  // 下单人收款码
-  on($('#btnCloseBuyerQr'),'click',()=>hide('#mBuyerQr'));
-  // 我的收款码
-  on($('#myQrUp'),'click',()=>{if(!_me)return toast('请先登录');const f=$('#myQrFile').files[0];if(!f)return toast('请先选图');const r=new FileReader();r.onload=e=>{localStorage.setItem('ball_myqr_'+_me.acc,e.target.result);renderMe();toast('已上传')};r.readAsDataURL(f)});
-  on($('#myQrClr'),'click',()=>{if(!_me)return;localStorage.removeItem('ball_myqr_'+_me.acc);renderMe();toast('已删除')});
-  // 退出登录
-  on($('#btnLogout'),'click',()=>{if(confirm('退出登录？'))logout()});
-
-  renderRuleBanner();
-  refreshNav();
-  if(_me){$('#headRight').innerHTML=`<span class="tag pri">${esc(_me.nick||_me.acc)}</span>`}
-  if(_adminOn&&_me&&isAdmin(_me.acc)){renderAdmin()}
-  renderBalls();
-}
-init();
 </script>
 </body>
 </html>
