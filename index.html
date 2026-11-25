@@ -79,27 +79,17 @@ function auth(){
   $('nav').style.display='none';$('bar').style.display='none';
   $('app').innerHTML=`<div class="card"><div class="title">🔐 登录 / 注册</div>
   <input id="acc" placeholder="账号"><input id="pwd" type="password" placeholder="密码"><input id="nick" placeholder="昵称（注册填）">
-  <button class="purple" onclick="login()">登录</button><button class="green" onclick="reg()">注册</button>
-  <div class="small">管理员固定账号：fenghua2898</div></div>`;
+  <button class="purple" onclick="login()">登录</button><button class="green" onclick="reg()">注册</button></div>`;
 }
 function login(){const a=$('acc').value.trim(),p=$('pwd').value.trim();const u=U.find(x=>x.acc===a&&x.pwd===p);if(!u)return toast('账号或密码错');M={acc:u.acc,nick:u.nick};save();toast('登录成功');go('buy')}
 function reg(){const a=$('acc').value.trim(),p=$('pwd').value.trim(),n=$('nick').value.trim()||a;if(!a||!p)return toast('填账号密码');if(U.some(x=>x.acc===a))return toast('账号已存在');U.push({acc:a,pwd:p,nick:n});M={acc:a,nick:n};save();toast('注册成功');go('buy')}
 
-/* ---------- 选购：特价栏1-15，普通栏1-60 ---------- */
+/* ---------- 选购 ---------- */
 function buy(){
   if(closed()){$('app').innerHTML=`<div class="card"><div class="title">⏰ 已停单</div><div>每日 ${CLOSE_H}:00 后停止接单，明天 0 点恢复。</div><button class="gray" onclick="logout()">退出</button></div>`;$('bar').style.display='none';return}
   let norm='',spec='';
-  // 特价球：只显示特价号（默认1-15）
-  for(let i=1;i<=TOTAL;i++){
-    if(!SPEC.includes(i))continue;
-    const on=selS.includes(i);
-    spec+=`<div class="ball sp ${on?'on':''}" onclick="pickS(${i})">${i}</div>`;
-  }
-  // 普通球：显示全部 1-60
-  for(let i=1;i<=TOTAL;i++){
-    const on=selN.includes(i);
-    norm+=`<div class="ball ${on?'on':''}" onclick="pickN(${i})">${i}</div>`;
-  }
+  for(let i=1;i<=TOTAL;i++){if(SPEC.includes(i)){const on=selS.includes(i);spec+=`<div class="ball sp ${on?'on':''}" onclick="pickS(${i})">${i}</div>`}}
+  for(let i=1;i<=TOTAL;i++){const on=selN.includes(i);norm+=`<div class="ball ${on?'on':''}" onclick="pickN(${i})">${i}</div>`}
   let area='';
   if(selN.length)area+=`<div class="card"><div class="small">⚪ 普通球已选 ${selN.length} 个：${selN.join('、')}</div><input id="amtN" type="text" inputmode="numeric" placeholder="每个金额，如20" value="${amtN}"><div class="small">小计 ¥${(selN.length*money(amtN)).toFixed(2)}</div></div>`;
   if(selS.length)area+=`<div class="card"><div class="small">🔥 特价球已选 ${selS.length} 个：${selS.join('、')}</div><input id="amtS" type="text" inputmode="numeric" placeholder="特价金额，如50" value="${amtS}"><div class="small">小计 ¥${(selS.length*money(amtS)).toFixed(2)}</div></div>`;
