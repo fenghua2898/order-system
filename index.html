@@ -11,9 +11,10 @@ body{background:#f4f6fa;font-family:-apple-system,BlinkMacSystemFont,"PingFang S
 .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px #0001}
 .title{font-size:16px;font-weight:700;color:#4b3bbd;margin-bottom:8px}
 .small{font-size:12px;color:#888}
-input,textarea{width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;margin:6px 0;font-size:15px}
+input,textarea,select{width:100%;padding:9px;border:1px solid #ddd;border-radius:8px;margin:6px 0;font-size:15px}
 button{width:100%;padding:11px;border:none;border-radius:9px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin:6px 0}
 .purple{background:#6c5ce7}.green{background:#27ae60}.red{background:#e74c3c}.gray{background:#999}.orange{background:#e67e22}
+.sm{width:auto;padding:6px 10px;font-size:12px;margin:3px 2px}
 .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:6px 0}
 .ball{padding:7px 0;text-align:center;border:1px solid #ddd;border-radius:6px;font-size:12px;cursor:pointer;background:#fff;user-select:none}
 .ball.on{background:#6c5ce7;color:#fff;border-color:#6c5ce7}
@@ -31,6 +32,8 @@ button{width:100%;padding:11px;border:none;border-radius:9px;color:#fff;font-siz
 .tag{padding:2px 7px;border-radius:9px;font-size:11px}
 .tag.ok{background:#d4edda;color:#155724}.tag.refund{background:#fff3cd;color:#856404}.tag.cancel{background:#eee;color:#666}
 .img{width:180px;height:180px;object-fit:contain;display:block;margin:8px auto;border:1px solid #eee;border-radius:8px}
+.detail-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #eee;font-size:13px}
+.open-detail{color:#6c5ce7;font-size:12px;cursor:pointer;text-decoration:underline;margin-left:6px}
 </style>
 </head>
 <body>
@@ -48,13 +51,11 @@ button{width:100%;padding:11px;border:none;border-radius:9px;color:#fff;font-siz
 const $=id=>document.getElementById(id);
 const DB={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
 let U=DB.get('users',[]),O=DB.get('orders',[]),M=DB.get('me',null);
-let QR=DB.get('qr','');            // 管理员收款码
-let REFUND=DB.get('qrRefund','');   // 管理员退补款码（备用）
-let RULE=DB.get('rule','');
+let QR=DB.get('qr',''),REFUND=DB.get('qrRefund',''),RULE=DB.get('rule','');
 let CLOSE_H=DB.get('closeH',21),CLOSE_ON=DB.get('closeOn',true);
 let SPEC=DB.get('specNos',[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
 let TOTAL=60;
-let selN=[],selS=[],amtN='',amtS='';
+let selN=[],selS=[],amtN='',amtS='',_openDetail=null;
 
 const isAdmin=a=>a==='fenghua2898';
 const curAdmin=()=>M&&isAdmin(M.acc);
@@ -71,20 +72,16 @@ const closeBox=()=>$('mask').classList.remove('on');
 function go(p){
   $('nav').style.display=M?'flex':'none';
   $('admTab').style.display=curAdmin()?'block':'none';
-  if(!M){return auth();}
+  if(!M){auth();return}
   if(p==='buy')buy();
   else if(p==='my')my();
   else if(p==='adm'){if(curAdmin())adm();else{buy();toast('不是管理员')}}
 }
 function auth(){
-  $('nav').style.display='none';
-  $('bar').style.display='none';
+  $('nav').style.display='none';$('bar').style.display='none';
   $('app').innerHTML=`<div class="card"><div class="title">🔐 登录 / 注册</div>
-  <input id="acc" placeholder="账号">
-  <input id="pwd" type="password" placeholder="密码">
-  <input id="nick" placeholder="昵称（注册填）">
-  <button class="purple" onclick="login()">登录</button>
-  <button class="green" onclick="reg()">注册</button>
+  <input id="acc" placeholder="账号"><input id="pwd" type="password" placeholder="密码"><input id="nick" placeholder="昵称（注册填）">
+  <button class="purple" onclick="login()">登录</button><button class="green" onclick="reg()">注册</button>
   <div class="small">管理员固定账号：fenghua2898</div></div>`;
 }
 function login(){const a=$('acc').value.trim(),p=$('pwd').value.trim();const u=U.find(x=>x.acc===a&&x.pwd===p);if(!u)return toast('账号或密码错');M={acc:u.acc,nick:u.nick};save();toast('登录成功');go('buy')}
@@ -93,121 +90,70 @@ function reg(){const a=$('acc').value.trim(),p=$('pwd').value.trim(),n=$('nick')
 /* ---------- 选购 ---------- */
 function buy(){
   if(closed()){$('app').innerHTML=`<div class="card"><div class="title">⏰ 已停单</div><div>每日 ${CLOSE_H}:00 后停止接单，明天 0 点恢复。</div><button class="gray" onclick="logout()">退出</button></div>`;$('bar').style.display='none';return}
-  const lk=locked();
-  let norm='',spec='';
-  for(let i=1;i<=TOTAL;i++){
-    const sp=SPEC.includes(i),on=sp?selS.includes(i):selN.includes(i),lkd=lk.includes(i);
-    const cls=`ball ${sp?'sp':''} ${on?'on':''} ${lkd?'locked':''}`;
-    const html=`<div class="${cls}" ${lkd?'':`onclick="pick(${i})"`}>${i}</div>`;
-    if(sp)spec+=html;else norm+=html;
-  }
+  const lk=locked();let norm='',spec='';
+  for(let i=1;i<=TOTAL;i++){const sp=SPEC.includes(i),on=sp?selS.includes(i):selN.includes(i),lkd=lk.includes(i);const cls=`ball ${sp?'sp':''} ${on?'on':''} ${lkd?'locked':''}`;const html=`<div class="${cls}" ${lkd?'':`onclick="pick(${i})"`}>${i}</div>`;if(sp)spec+=html;else norm+=html;}
   let area='';
   if(selN.length)area+=`<div class="card"><div class="small">⚪ 普通球已选 ${selN.length} 个：${selN.join('、')}</div><input id="amtN" type="text" inputmode="numeric" placeholder="每个金额，如20" value="${amtN}"><div class="small">小计 ¥${(selN.length*money(amtN)).toFixed(2)}</div></div>`;
   if(selS.length)area+=`<div class="card"><div class="small">🔥 特价球已选 ${selS.length} 个：${selS.join('、')}</div><input id="amtS" type="text" inputmode="numeric" placeholder="特价金额，如50" value="${amtS}"><div class="small">小计 ¥${(selS.length*money(amtS)).toFixed(2)}</div></div>`;
-  $('app').innerHTML=`<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL} 个）</div>
-    ${RULE?`<div class="small">💡${RULE}</div>`:''}
-    ${lk.length?`<div class="small">🔒 已下单：${lk.join('、')}</div>`:''}
-    <div class="title" style="color:#e67e22;font-size:14px">🔥 特价球（${SPEC.length}个）</div>
-    <div class="grid">${spec}</div>
-    <div class="title" style="font-size:14px">⚪ 普通球（${TOTAL-SPEC.length}个）</div>
-    <div class="grid">${norm}</div>
-    <div class="small">点号选中，再点取消</div></div>
-    ${area}
+  $('app').innerHTML=`<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL} 个）</div>${RULE?`<div class="small">💡${RULE}</div>`:''}${lk.length?`<div class="small">🔒 已下单：${lk.join('、')}</div>`:''}
+    <div class="title" style="color:#e67e22;font-size:14px">🔥 特价球（${SPEC.length}个）</div><div class="grid">${spec}</div>
+    <div class="title" style="font-size:14px">⚪ 普通球（${TOTAL-SPEC.length}个）</div><div class="grid">${norm}</div><div class="small">点号选中，再点取消</div></div>${area}
     <div class="card"><button class="purple" onclick="preOrder()">确认下单</button><button class="gray" onclick="logout()">退出</button></div>`;
   if($('amtN'))$('amtN').oninput=e=>{amtN=e.target.value.replace(/[^\d.]/g,'').replace(/(\..*)\./g,'$1');e.target.value=amtN;bar()};
   if($('amtS'))$('amtS').oninput=e=>{amtS=e.target.value.replace(/[^\d.]/g,'').replace(/(\..*)\./g,'$1');e.target.value=amtS;bar()};
   bar();
 }
 function pick(i){if(locked().includes(i))return;if(SPEC.includes(i)){selS.includes(i)?selS=selS.filter(x=>x!==i):selS.push(i)}else{selN.includes(i)?selN=selN.filter(x=>x!==i):selN.push(i)}buy()}
-function bar(){
-  const t=selN.length*money(amtN)+selS.length*money(amtS);
-  if(selN.length||selS.length){$('bar').style.display='flex';$('bar').innerHTML=`<span>合计 <b style="color:#e74c3c">¥${t.toFixed(2)}</b>（${selN.length+selS.length}个）</span><button class="purple" style="width:auto;padding:8px 16px" onclick="preOrder()">下单</button>`}
-  else $('bar').style.display='none';
-}
-function preOrder(){
-  if(!selN.length&&!selS.length)return toast('先选球号');
-  if(selN.length&&!money(amtN))return toast('填普通球金额');
-  if(selS.length&&!money(amtS))return toast('填特价球金额');
-  const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];
-  const total=items.reduce((s,i)=>s+i.amt,0);
-  openBox(`<div class="title">确认下单</div>
-    <div class="small">📅 ${fmt(Date.now())}</div>
-    ${items.map(i=>`<div style="display:flex;justify-content:space-between;padding:3px 0"><span>${i.spec?'🔥':'⚪'}${i.no}号</span><b style="color:#e74c3c">¥${i.amt.toFixed(2)}</b></div>`).join('')}
-    <div style="border-top:1px solid #eee;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between"><span>合计</span><b style="color:#e74c3c">¥${total.toFixed(2)}</b></div>
-    <div class="small" style="margin:8px 0">① 扫管理员收款码付款</div>
-    ${QR?`<img class="img" src="${QR}">`:`<div class="small" style="color:#e74c3c">管理员还没设收款码</div>`}
-    <button class="green" onclick="submitOrder(${total})">我已付款，提交订单</button>
-    <button class="gray" onclick="closeBox()">返回</button>`);
-}
-function submitOrder(total){
-  const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];
-  O.unshift({id:Date.now(),acc:M.acc,nick:M.nick,items,price:total,status:'待确认',time:Date.now(),paidAt:null,
-    refundImg:M.refundImg||''});
-  save();selN=[];selS=[];amtN='';amtS='';closeBox();toast('下单成功');go('my');
-}
+function bar(){const t=selN.length*money(amtN)+selS.length*money(amtS);if(selN.length||selS.length){$('bar').style.display='flex';$('bar').innerHTML=`<span>合计 <b style="color:#e74c3c">¥${t.toFixed(2)}</b>（${selN.length+selS.length}个）</span><button class="purple" style="width:auto;padding:8px 16px" onclick="preOrder()">下单</button>`}else $('bar').style.display='none'}
+function preOrder(){if(!selN.length&&!selS.length)return toast('先选球号');if(selN.length&&!money(amtN))return toast('填普通球金额');if(selS.length&&!money(amtS))return toast('填特价球金额');const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];const total=items.reduce((s,i)=>s+i.amt,0);openBox(`<div class="title">确认下单</div><div class="small">📅 ${fmt(Date.now())}</div>${items.map(i=>`<div class="detail-row"><span>${i.spec?'🔥':'⚪'}${i.no}号</span><b style="color:#e74c3c">¥${i.amt.toFixed(2)}</b></div>`).join('')}<div class="detail-row" style="border-top:2px solid #eee;font-weight:800"><span>合计</span><b style="color:#e74c3c">¥${total.toFixed(2)}</b></div>${QR?`<img class="img" src="${QR}"><div class="small" style="text-align:center">扫码付款</div>`:'<div class="small" style="color:#e74c3c">管理员还没设收款码</div>'}<button class="green" onclick="submitOrder(${total})">我已付款，提交</button><button class="gray" onclick="closeBox()">返回</button>`)}
+function submitOrder(total){const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];O.unshift({id:Date.now(),acc:M.acc,nick:M.nick,items,price:total,status:'待确认',time:Date.now(),paidAt:null,refundImg:M.refundImg||''});save();selN=[];selS=[];amtN='';amtS='';closeBox();toast('下单成功');go('my')}
 
 /* ---------- 我的 ---------- */
-function my(){
-  const mine=O.filter(o=>o.acc===M.acc);
-  let h=`<div class="card"><div class="title">📋 我的订单（${mine.length}）</div>`;
-  mine.forEach(o=>{
-    h+=`<div class="card" style="margin:8px 0">
-      <div style="display:flex;justify-content:space-between"><b>#${String(o.id).slice(-6)}</b><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':o.status==='取消'?'cancel':''}">${o.status}</span></div>
-      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} ¥${i.amt.toFixed(2)}</span>`).join('')}</div>
-      <div class="small">📅 ${fmt(o.time)}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:4px"><span class="small">总额</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>
-      ${o.paidAt?`<div class="small">💰 收款时间：${fmt(o.paidAt)}</div>`:''}
-      <div class="small" style="margin-top:6px">② 上传我的补款/退款码（管理员看）</div>
-      <input type="file" accept="image/*" onchange="upRefund(event,${o.id})">
-      ${o.refundImg?`<img class="img" src="${o.refundImg}"><div class="small">已上传补退款码</div>`:(M.refundImg?`<img class="img" src="${M.refundImg}"><div class="small">账号默认补退款码</div>`:'')}
-    </div>`;
-  });
-  if(!mine.length)h+='<div class="small">暂无订单</div>';
-  h+=`<div class="card"><div class="small">我的补款/退款码（所有订单通用）</div>
-    <input type="file" accept="image/*" onchange="upMyRefund(event)">
-    ${M.refundImg?`<img class="img" src="${M.refundImg}">`:'<div class="small">未上传</div>'}
-    <button class="gray" onclick="logout()">退出登录</button></div></div>`;
-  $('app').innerHTML=h;$('bar').style.display='none';
-}
-function upRefund(e,id){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const o=O.find(x=>x.id===id);if(o){o.refundImg=r.result;save();toast('补退款码已上传');my()} };r.readAsDataURL(f)}
-function upMyRefund(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{M.refundImg=r.result;save();toast('已保存');my()}}
+function my(){const mine=O.filter(o=>o.acc===M.acc);let h=`<div class="card"><div class="title">📋 我的订单（${mine.length}）</div>`;mine.forEach(o=>{h+=`<div class="card" style="margin:8px 0"><div style="display:flex;justify-content:space-between"><b>#${String(o.id).slice(-6)}</b><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':o.status==='取消'?'cancel':''}">${o.status}</span></div><div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} ¥${i.amt.toFixed(2)}</span>`).join('')}</div><div class="small">📅 ${fmt(o.time)}</div><div style="display:flex;justify-content:space-between;margin-top:4px"><span class="small">总额</span><b style="color:#e74c3c">¥${o.price.toFixed(2)}</b></div>${o.paidAt?`<div class="small">💰 ${fmt(o.paidAt)}</div>`:''}<div class="small" style="margin-top:6px">上传补款/退款码</div><input type="file" accept="image/*" onchange="upRefund(event,${o.id})">${o.refundImg?`<img class="img" src="${o.refundImg}">`:''}</div>`});if(!mine.length)h+='<div class="small">暂无订单</div>';h+=`<div class="card"><div class="small">我的补款/退款码（通用）</div><input type="file" accept="image/*" onchange="upMyRefund(event)">${M.refundImg?`<img class="img" src="${M.refundImg}">`:''}<button class="gray" onclick="logout()">退出</button></div>`;$('app').innerHTML=h;$('bar').style.display='none'}
+function upRefund(e,id){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const o=O.find(x=>x.id===id);if(o){o.refundImg=r.result;save();toast('已上传');my()}};r.readAsDataURL(f)}
+function upMyRefund(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{M.refundImg=r.result;save();toast('已保存');my()};r.readAsDataURL(f)}
 
-/* ---------- 后台（仅 fenghua2898）---------- */
+/* ---------- 后台 ---------- */
 function adm(){
   if(!curAdmin()){go('buy');return}
+  const sq=($('searchNo')?.value||'').trim();
+  let list=O;
+  if(sq){const sn=parseInt(sq);list=O.filter(o=>o.items.some(i=>i.no===sn))}
+  
   let h=`<div class="card"><div class="title">⚙️ 管理员后台（${M.acc}）</div>
     <div style="display:flex;justify-content:space-between"><span>订单数</span><b>${O.length}</b></div>
     <div style="display:flex;justify-content:space-between"><span>总额</span><b style="color:#e74c3c">¥${O.reduce((s,o)=>s+o.price,0).toFixed(2)}</b></div></div>
   <div class="card"><div class="title">收款 / 退补款码</div>
     <div class="small">① 收款二维码（客户下单扫这个）</div>
-    <input type="file" accept="image/*" onchange="upQR(event)">
-    ${QR?`<img class="img" src="${QR}">`:'<div class="small">未设置</div>'}
+    <input type="file" accept="image/*" onchange="upQR(event)">${QR?`<img class="img" src="${QR}">`:'<div class="small">未设置</div>'}
     <div class="small" style="margin-top:8px">退补款码（备用）</div>
-    <input type="file" accept="image/*" onchange="upREFUND(event)">
-    ${REFUND?`<img class="img" src="${REFUND}">`:''}
-    <div class="small" style="margin-top:8px">规则说明</div>
-    <textarea id="rule">${RULE}</textarea>
-    <button class="purple" onclick="RULE=$('rule').value;save();toast('已保存')">保存规则</button>
-  </div>
+    <input type="file" accept="image/*" onchange="upREFUND(event)">${REFUND?`<img class="img" src="${REFUND}">`:''}
+    <div class="small" style="margin-top:8px">规则说明</div><textarea id="rule">${RULE}</textarea>
+    <button class="purple" onclick="RULE=$('rule').value;save();toast('已保存')">保存规则</button></div>
   <div class="card"><div class="title">球号 / 停单</div>
-    总数<input id="total" type="number" value="${TOTAL}">
-    <button class="purple" onclick="TOTAL=+($('total').value||60);toast('保存后刷新')">保存总数</button>
-    特价球号（逗号）<input id="spec" value="${SPEC.join(',')}">
-    <button class="orange" onclick="SPEC=$('spec').value.split(',').map(Number).filter(n=>n>0);save();toast('保存后刷新')">保存特价</button>
+    总数<input id="total" type="number" value="${TOTAL}"><button class="purple" onclick="TOTAL=+($('total').value||60);save();toast('保存')">保存总数</button>
+    特价球号（逗号）<input id="spec" value="${SPEC.join(',')}"><button class="orange" onclick="SPEC=$('spec').value.split(',').map(Number).filter(n=>n>0);save();toast('保存')">保存特价</button>
     停单时间<select id="ch">${[...Array(24)].map((_,i)=>`<option ${i===CLOSE_H?'selected':''}>${i}</option>`).join('')}</select>
-    <label><input type="checkbox" id="co" ${CLOSE_ON?'checked':''}> 启用21点停单</label>
-    <button class="purple" onclick="CLOSE_H=+$('ch').value;CLOSE_ON=$('co').checked;save();toast('✓')">保存停单</button>
-  </div>
-  <div class="card"><div class="title">全部订单（${O.length}）</div>`;
-  O.forEach(o=>{
+    <label><input type="checkbox" id="co" ${CLOSE_ON?'checked':''}> 启用停单</label>
+    <button class="purple" onclick="CLOSE_H=+$('ch').value;CLOSE_ON=$('co').checked;save();toast('✓')">保存停单</button></div>
+  <div class="card"><div class="title">🔍 球号搜索</div>
+    <div style="display:flex;gap:6px"><input id="searchNo" placeholder="输入球号如2" value="${sq}"><button class="sm purple" onclick="adm()">搜索</button>${sq?`<button class="sm gray" onclick="$('searchNo').value='';adm()">清空</button>`:''}</div>
+    ${sq?`<div class="small">🔍 ${sq}号订单共 ${list.length} 笔</div>`:''}</div>
+  <div class="card"><div class="title">📋 全部订单（${sq?list.length:O.length}）</div>`;
+  
+  list.forEach(o=>{
+    const detailOpen=_openDetail===o.id;
     h+=`<div class="card" style="margin:8px 0">
-      <div style="display:flex;justify-content:space-between"><b>${o.nick}（${o.acc}）</b><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':o.status==='取消'?'cancel':''}">${o.status}</span></div>
-      <div>${o.items.map(i=>`<span style="display:inline-block;margin:2px;padding:2px 5px;background:#f0f0f0;border-radius:4px;font-size:11px">${i.spec?'🔥':'⚪'}${i.no} ¥${i.amt.toFixed(2)}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><div><b>${o.nick}（${o.acc}）</b><span class="tag ${o.status==='已确认'?'ok':o.status==='已退款'?'refund':o.status==='取消'?'cancel':''}" style="margin-left:6px">${o.status}</span></div><span class="open-detail" onclick="_openDetail=${detailOpen?null:o.id};adm()">${detailOpen?'收起':'📂 明细'}</span></div>
       <div class="small">📅 ${fmt(o.time)} ｜ 总额 ¥${o.price.toFixed(2)}</div>
-      ${o.refundImg?`<div class="small">客户补退款码：</div><img class="img" src="${o.refundImg}">`:''}
-      <button class="green" onclick="setSt(${o.id},'已确认')">收款确认</button>
-      <button class="orange" onclick="setSt(${o.id},'已退款')">退款</button>
-      <button class="gray" onclick="setSt(${o.id},'取消')">取消</button>
+      ${detailOpen?`<div style="background:#f8f7ff;border-radius:8px;padding:8px;margin-top:6px">
+        <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:4px"><span>球号</span><span>金额</span></div>
+        ${o.items.map(i=>`<div class="detail-row"><span>${i.spec?'🔥':'⚪'}${i.no}号</span><span style="color:#e74c3c">¥${i.amt.toFixed(2)}</span></div>`).join('')}
+        <div class="detail-row" style="border-top:2px solid #eee;font-weight:800"><span>合计</span><span style="color:#e74c3c">¥${o.price.toFixed(2)}</span></div>
+        ${o.paidAt?`<div class="small">💰 收款时间：${fmt(o.paidAt)}</div>`:''}
+        ${o.refundImg?`<div class="small">客户补退款码：</div><img class="img" src="${o.refundImg}">`:''}
+      </div>`:''}
+      <div style="margin-top:4px"><button class="sm green" onclick="setSt(${o.id},'已确认')">收款</button><button class="sm orange" onclick="setSt(${o.id},'已退款')">退款</button><button class="sm gray" onclick="setSt(${o.id},'取消')">取消</button></div>
     </div>`;
   });
   h+=`<button class="green" onclick="exportData()">📦 导出备份</button>
@@ -215,14 +161,13 @@ function adm(){
       <button class="gray" onclick="logout()">退出</button></div>`;
   $('app').innerHTML=h;$('bar').style.display='none';
 }
+
 function upQR(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{QR=r.result;save();toast('收款码已保存');adm()};r.readAsDataURL(f)}
 function upREFUND(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{REFUND=r.result;save();toast('退补款码已保存');adm()};r.readAsDataURL(f)}
 function setSt(id,s){const o=O.find(x=>x.id===id);if(o){o.status=s;if(s==='已确认')o.paidAt=Date.now();save();adm();if(M.acc===o.acc)my()}}
 function exportData(){const d={users:U,orders:O,qr:QR,qrRefund:REFUND,rule:RULE,closeH:CLOSE_H,closeOn:CLOSE_ON,specNos:SPEC,total:TOTAL};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup.json';a.click()}
-
 function logout(){M=null;save();go('buy')}
 
-/* 启动 */
 try{if(M)go('buy');else auth()}catch(e){auth()}
 </script>
 </body>
