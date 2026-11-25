@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>商品下单</title>
+<style>
+body{font-family:system-ui;max-width:480px;margin:30px auto;padding:0 16px}
+input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
+button{width:100%;padding:12px;background:#22c55e;color:#fff;border:0;border-radius:4px;margin-top:10px;cursor:pointer}
+#msg{margin-top:12px;font-weight:bold}
+</style>
+</head>
+<body>
+<h2>📦 提交订单</h2>
+<input id="customer_name" placeholder="姓名 *">
+<input id="phone" placeholder="电话 *">
+<input id="item" placeholder="商品名称 *">
+<input id="model" placeholder="型号/规格">
+<input id="qty" type="number" value="1" min="1" placeholder="数量">
+<input id="price" type="number" step="0.01" placeholder="单价">
+<input id="address" placeholder="收货地址">
+<textarea id="remark" placeholder="备注"></textarea>
+<button onclick="submitOrder()">✅ 提交订单</button>
+<div id="msg"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = window.supabase.createClient(
+  'https://njcvurojlhxpgqipnqlpb.supabase.co',
+  'sb_publishable_G4eh0RG8JbSBfnFntHFHYA_biGrRL2g'
+);
+
+async function submitOrder(){
+  const d = {
+    customer_name: document.getElementById('customer_name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    item: document.getElementById('item').value.trim(),
+    model: document.getElementById('model').value.trim(),
+    qty: parseInt(document.getElementById('qty').value) || 1,
+    price: parseFloat(document.getElementById('price').value) || 0,
+    address: document.getElementById('address').value.trim(),
+    remark: document.getElementById('remark').value.trim(),
+    status: '待处理'
+  };
+  if(!d.customer_name || !d.phone || !d.item){
+    alert('请填写姓名、电话、商品（带*必填）');
+    return;
+  }
+  const { error } = await supabase.from('orders').insert(d);
+  const msg = document.getElementById('msg');
+  if(error){
+    msg.style.color = 'red';
+    msg.innerText = '提交失败：' + error.message;
+  } else {
+    msg.style.color = 'green';
+    msg.innerText = '✅ 提交成功！';
+    document.querySelectorAll('input,textarea').forEach(e => e.value = '');
+    document.getElementById('qty').value = 1;
+  }
+}
+</script>
+</body>
+</html>

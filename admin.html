@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>订单管理后台</title>
+<style>
+body{font-family:system-ui;margin:20px}
+table{border-collapse:collapse;width:100%;margin-top:12px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:14px}
+th{background:#f3f4f6;position:sticky;top:0}
+input.search{padding:10px;width:100%;max-width:350px;margin-bottom:12px;border:1px solid #ccc;border-radius:4px}
+select{padding:4px;border-radius:4px}
+.status-new{color:#f59e0b} .status-done{color:#22c55e} .status-cancel{color:#ef4444}
+</style>
+</head>
+<body>
+<h2>📋 订单管理</h2>
+<input class="search" id="search" placeholder="🔍 搜索电话/姓名..." oninput="load()">
+
+<table>
+<thead>
+<tr><th>ID</th><th>姓名</th><th>电话</th><th>商品</th><th>数量</th><th>合计</th><th>状态</th><th>时间</th></tr>
+</thead>
+<tbody id="tb"><tr><td colspan="8">加载中...</td></tr></tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = window.supabase.createClient(
+  'https://njcvurojlhxpgqipnqlpb.supabase.co',
+  'sb_publishable_G4eh0RG8JbSBfnFntHFHYA_biGrRL2g'
+);
+
+async function load(){
+  let query = supabase.from('orders').select('*').order('created_at',{ascending:false}).limit(100);
+  const kw = document.getElementById('search').value.trim();
+  if(kw) query = query.or(`phone.ilike.%${kw}%,customer_name.ilike.%${kw}%`);
+  const { data, error } = await query;
+  if(error){ alert('加载失败：' + error.message); return; }
+  if(!data || data.length === 0){
+    document.getElementById('tb').innerHTML = '<tr><td colspan="8">暂无订单</td></tr>';
+    return;
+  }
+  document.getElementById('tb').innerHTML = data.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td>${r.customer_name}</td>
+      <td>${r.phone}</td>
+      <td>${r.item} ${r.model ? '('+r.model+')' : ''}</td>
+      <td>${r.qty}</td>
+      <td>¥${(r.price * r.qty).toFixed(2)}</td>
+      <td><select onchange="upd(${r.id},this.value)">
+        ${['待处理','已完成','已取消'].map(s => `<option value="${s}" ${s===r.status?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td>${new Date(r.created_at).toLocaleString('zh-CN')}</td>
+    </tr>`).join('');
+}
+
+async function upd(id, status){
+  await supabase.from('orders').update({status}).eq('id', id);
+  load();
+}
+
+load();
+</script>
+</body>
+</html>
