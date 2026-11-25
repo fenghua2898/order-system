@@ -20,7 +20,6 @@ button{width:100%;padding:11px;border:none;border-radius:9px;color:#fff;font-siz
 .ball.on{background:#6c5ce7;color:#fff;border-color:#6c5ce7}
 .ball.sp{background:#fff5f5;border-color:#ff6b6b;color:#e74c3c}
 .ball.sp.on{background:#ff6b6b;color:#fff;border-color:#ff6b6b}
-.ball.locked{background:#f0f0f0;color:#bbb;cursor:not-allowed}
 .bar{position:fixed;bottom:46px;left:0;right:0;background:#fff;border-top:2px solid #6c5ce7;padding:10px 14px;display:none;justify-content:space-between;align-items:center;z-index:9;max-width:480px;margin:auto}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex}
 .nav div{flex:1;text-align:center;padding:9px;font-size:12px;cursor:pointer}
@@ -61,7 +60,6 @@ const isAdmin=a=>a==='fenghua2898';
 const curAdmin=()=>M&&isAdmin(M.acc);
 const fmt=t=>{const d=new Date(t),w=['日','一','二','三','四','五','六'];return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} 周${w[d.getDay()]} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
 const closed=()=>CLOSE_ON&&new Date().getHours()>=CLOSE_H;
-const locked=()=>O.filter(o=>o.status!=='取消'&&o.status!=='已退款').flatMap(o=>o.items.map(i=>i.no));
 const money=v=>(parseFloat(v)||0);
 const toast=m=>{const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>e.style.display='none',1800)};
 const save=()=>{DB.set('users',U);DB.set('orders',O);DB.set('me',M);DB.set('qr',QR);DB.set('qrRefund',REFUND);DB.set('rule',RULE);DB.set('closeH',CLOSE_H);DB.set('closeOn',CLOSE_ON);DB.set('specNos',SPEC)};
@@ -87,23 +85,28 @@ function auth(){
 function login(){const a=$('acc').value.trim(),p=$('pwd').value.trim();const u=U.find(x=>x.acc===a&&x.pwd===p);if(!u)return toast('账号或密码错');M={acc:u.acc,nick:u.nick};save();toast('登录成功');go('buy')}
 function reg(){const a=$('acc').value.trim(),p=$('pwd').value.trim(),n=$('nick').value.trim()||a;if(!a||!p)return toast('填账号密码');if(U.some(x=>x.acc===a))return toast('账号已存在');U.push({acc:a,pwd:p,nick:n});M={acc:a,nick:n};save();toast('注册成功');go('buy')}
 
-/* ---------- 选购 ---------- */
+/* ---------- 选购（不锁号，随便选） ---------- */
 function buy(){
   if(closed()){$('app').innerHTML=`<div class="card"><div class="title">⏰ 已停单</div><div>每日 ${CLOSE_H}:00 后停止接单，明天 0 点恢复。</div><button class="gray" onclick="logout()">退出</button></div>`;$('bar').style.display='none';return}
-  const lk=locked();let norm='',spec='';
-  for(let i=1;i<=TOTAL;i++){const sp=SPEC.includes(i),on=sp?selS.includes(i):selN.includes(i),lkd=lk.includes(i);const cls=`ball ${sp?'sp':''} ${on?'on':''} ${lkd?'locked':''}`;const html=`<div class="${cls}" ${lkd?'':`onclick="pick(${i})"`}>${i}</div>`;if(sp)spec+=html;else norm+=html;}
+  let norm='',spec='';
+  for(let i=1;i<=TOTAL;i++){
+    const sp=SPEC.includes(i),on=sp?selS.includes(i):selN.includes(i);
+    const cls=`ball ${sp?'sp':''} ${on?'on':''}`;
+    const html=`<div class="${cls}" onclick="pick(${i})">${i}</div>`;
+    if(sp)spec+=html;else norm+=html;
+  }
   let area='';
   if(selN.length)area+=`<div class="card"><div class="small">⚪ 普通球已选 ${selN.length} 个：${selN.join('、')}</div><input id="amtN" type="text" inputmode="numeric" placeholder="每个金额，如20" value="${amtN}"><div class="small">小计 ¥${(selN.length*money(amtN)).toFixed(2)}</div></div>`;
   if(selS.length)area+=`<div class="card"><div class="small">🔥 特价球已选 ${selS.length} 个：${selS.join('、')}</div><input id="amtS" type="text" inputmode="numeric" placeholder="特价金额，如50" value="${amtS}"><div class="small">小计 ¥${(selS.length*money(amtS)).toFixed(2)}</div></div>`;
-  $('app').innerHTML=`<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL} 个）</div>${RULE?`<div class="small">💡${RULE}</div>`:''}${lk.length?`<div class="small">🔒 已下单：${lk.join('、')}</div>`:''}
+  $('app').innerHTML=`<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL} 个）</div>${RULE?`<div class="small">💡${RULE}</div>`:''}
     <div class="title" style="color:#e67e22;font-size:14px">🔥 特价球（${SPEC.length}个）</div><div class="grid">${spec}</div>
-    <div class="title" style="font-size:14px">⚪ 普通球（${TOTAL-SPEC.length}个）</div><div class="grid">${norm}</div><div class="small">点号选中，再点取消</div></div>${area}
+    <div class="title" style="font-size:14px">⚪ 普通球（${TOTAL-SPEC.length}个）</div><div class="grid">${norm}</div><div class="small">点号选中，再点取消（已下单的号也可重复选）</div></div>${area}
     <div class="card"><button class="purple" onclick="preOrder()">确认下单</button><button class="gray" onclick="logout()">退出</button></div>`;
   if($('amtN'))$('amtN').oninput=e=>{amtN=e.target.value.replace(/[^\d.]/g,'').replace(/(\..*)\./g,'$1');e.target.value=amtN;bar()};
   if($('amtS'))$('amtS').oninput=e=>{amtS=e.target.value.replace(/[^\d.]/g,'').replace(/(\..*)\./g,'$1');e.target.value=amtS;bar()};
   bar();
 }
-function pick(i){if(locked().includes(i))return;if(SPEC.includes(i)){selS.includes(i)?selS=selS.filter(x=>x!==i):selS.push(i)}else{selN.includes(i)?selN=selN.filter(x=>x!==i):selN.push(i)}buy()}
+function pick(i){if(SPEC.includes(i)){selS.includes(i)?selS=selS.filter(x=>x!==i):selS.push(i)}else{selN.includes(i)?selN=selN.filter(x=>x!==i):selN.push(i)}buy()}
 function bar(){const t=selN.length*money(amtN)+selS.length*money(amtS);if(selN.length||selS.length){$('bar').style.display='flex';$('bar').innerHTML=`<span>合计 <b style="color:#e74c3c">¥${t.toFixed(2)}</b>（${selN.length+selS.length}个）</span><button class="purple" style="width:auto;padding:8px 16px" onclick="preOrder()">下单</button>`}else $('bar').style.display='none'}
 function preOrder(){if(!selN.length&&!selS.length)return toast('先选球号');if(selN.length&&!money(amtN))return toast('填普通球金额');if(selS.length&&!money(amtS))return toast('填特价球金额');const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];const total=items.reduce((s,i)=>s+i.amt,0);openBox(`<div class="title">确认下单</div><div class="small">📅 ${fmt(Date.now())}</div>${items.map(i=>`<div class="detail-row"><span>${i.spec?'🔥':'⚪'}${i.no}号</span><b style="color:#e74c3c">¥${i.amt.toFixed(2)}</b></div>`).join('')}<div class="detail-row" style="border-top:2px solid #eee;font-weight:800"><span>合计</span><b style="color:#e74c3c">¥${total.toFixed(2)}</b></div>${QR?`<img class="img" src="${QR}"><div class="small" style="text-align:center">扫码付款</div>`:'<div class="small" style="color:#e74c3c">管理员还没设收款码</div>'}<button class="green" onclick="submitOrder(${total})">我已付款，提交</button><button class="gray" onclick="closeBox()">返回</button>`)}
 function submitOrder(total){const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];O.unshift({id:Date.now(),acc:M.acc,nick:M.nick,items,price:total,status:'待确认',time:Date.now(),paidAt:null,refundImg:M.refundImg||''});save();selN=[];selS=[];amtN='';amtS='';closeBox();toast('下单成功');go('my')}
