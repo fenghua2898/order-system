@@ -85,28 +85,34 @@ function auth(){
 function login(){const a=$('acc').value.trim(),p=$('pwd').value.trim();const u=U.find(x=>x.acc===a&&x.pwd===p);if(!u)return toast('账号或密码错');M={acc:u.acc,nick:u.nick};save();toast('登录成功');go('buy')}
 function reg(){const a=$('acc').value.trim(),p=$('pwd').value.trim(),n=$('nick').value.trim()||a;if(!a||!p)return toast('填账号密码');if(U.some(x=>x.acc===a))return toast('账号已存在');U.push({acc:a,pwd:p,nick:n});M={acc:a,nick:n};save();toast('注册成功');go('buy')}
 
-/* ---------- 选购（不锁号，随便选） ---------- */
+/* ---------- 选购：特价栏1-15，普通栏1-60 ---------- */
 function buy(){
   if(closed()){$('app').innerHTML=`<div class="card"><div class="title">⏰ 已停单</div><div>每日 ${CLOSE_H}:00 后停止接单，明天 0 点恢复。</div><button class="gray" onclick="logout()">退出</button></div>`;$('bar').style.display='none';return}
   let norm='',spec='';
+  // 特价球：只显示特价号（默认1-15）
   for(let i=1;i<=TOTAL;i++){
-    const sp=SPEC.includes(i),on=sp?selS.includes(i):selN.includes(i);
-    const cls=`ball ${sp?'sp':''} ${on?'on':''}`;
-    const html=`<div class="${cls}" onclick="pick(${i})">${i}</div>`;
-    if(sp)spec+=html;else norm+=html;
+    if(!SPEC.includes(i))continue;
+    const on=selS.includes(i);
+    spec+=`<div class="ball sp ${on?'on':''}" onclick="pickS(${i})">${i}</div>`;
+  }
+  // 普通球：显示全部 1-60
+  for(let i=1;i<=TOTAL;i++){
+    const on=selN.includes(i);
+    norm+=`<div class="ball ${on?'on':''}" onclick="pickN(${i})">${i}</div>`;
   }
   let area='';
   if(selN.length)area+=`<div class="card"><div class="small">⚪ 普通球已选 ${selN.length} 个：${selN.join('、')}</div><input id="amtN" type="text" inputmode="numeric" placeholder="每个金额，如20" value="${amtN}"><div class="small">小计 ¥${(selN.length*money(amtN)).toFixed(2)}</div></div>`;
   if(selS.length)area+=`<div class="card"><div class="small">🔥 特价球已选 ${selS.length} 个：${selS.join('、')}</div><input id="amtS" type="text" inputmode="numeric" placeholder="特价金额，如50" value="${amtS}"><div class="small">小计 ¥${(selS.length*money(amtS)).toFixed(2)}</div></div>`;
   $('app').innerHTML=`<div class="card"><div class="title">🎯 选购球号（共 ${TOTAL} 个）</div>${RULE?`<div class="small">💡${RULE}</div>`:''}
-    <div class="title" style="color:#e67e22;font-size:14px">🔥 特价球（${SPEC.length}个）</div><div class="grid">${spec}</div>
-    <div class="title" style="font-size:14px">⚪ 普通球（${TOTAL-SPEC.length}个）</div><div class="grid">${norm}</div><div class="small">点号选中，再点取消（已下单的号也可重复选）</div></div>${area}
+    <div class="title" style="color:#e67e22;font-size:14px">🔥 特价球（${SPEC.length}个：${SPEC.join('、')}）</div><div class="grid">${spec}</div>
+    <div class="title" style="font-size:14px">⚪ 普通球（全部 1-${TOTAL}）</div><div class="grid">${norm}</div><div class="small">点号选中，再点取消（可重复下单）</div></div>${area}
     <div class="card"><button class="purple" onclick="preOrder()">确认下单</button><button class="gray" onclick="logout()">退出</button></div>`;
   if($('amtN'))$('amtN').oninput=e=>{amtN=e.target.value.replace(/[^\d.]/g,'').replace(/(\..*)\./g,'$1');e.target.value=amtN;bar()};
   if($('amtS'))$('amtS').oninput=e=>{amtS=e.target.value.replace(/[^\d.]/g,'').replace(/(\..*)\./g,'$1');e.target.value=amtS;bar()};
   bar();
 }
-function pick(i){if(SPEC.includes(i)){selS.includes(i)?selS=selS.filter(x=>x!==i):selS.push(i)}else{selN.includes(i)?selN=selN.filter(x=>x!==i):selN.push(i)}buy()}
+function pickN(i){selN.includes(i)?selN=selN.filter(x=>x!==i):selN.push(i);buy()}
+function pickS(i){selS.includes(i)?selS=selS.filter(x=>x!==i):selS.push(i);buy()}
 function bar(){const t=selN.length*money(amtN)+selS.length*money(amtS);if(selN.length||selS.length){$('bar').style.display='flex';$('bar').innerHTML=`<span>合计 <b style="color:#e74c3c">¥${t.toFixed(2)}</b>（${selN.length+selS.length}个）</span><button class="purple" style="width:auto;padding:8px 16px" onclick="preOrder()">下单</button>`}else $('bar').style.display='none'}
 function preOrder(){if(!selN.length&&!selS.length)return toast('先选球号');if(selN.length&&!money(amtN))return toast('填普通球金额');if(selS.length&&!money(amtS))return toast('填特价球金额');const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];const total=items.reduce((s,i)=>s+i.amt,0);openBox(`<div class="title">确认下单</div><div class="small">📅 ${fmt(Date.now())}</div>${items.map(i=>`<div class="detail-row"><span>${i.spec?'🔥':'⚪'}${i.no}号</span><b style="color:#e74c3c">¥${i.amt.toFixed(2)}</b></div>`).join('')}<div class="detail-row" style="border-top:2px solid #eee;font-weight:800"><span>合计</span><b style="color:#e74c3c">¥${total.toFixed(2)}</b></div>${QR?`<img class="img" src="${QR}"><div class="small" style="text-align:center">扫码付款</div>`:'<div class="small" style="color:#e74c3c">管理员还没设收款码</div>'}<button class="green" onclick="submitOrder(${total})">我已付款，提交</button><button class="gray" onclick="closeBox()">返回</button>`)}
 function submitOrder(total){const items=[...selN.map(n=>({no:n,amt:money(amtN),spec:false})),...selS.map(n=>({no:n,amt:money(amtS),spec:true}))];O.unshift({id:Date.now(),acc:M.acc,nick:M.nick,items,price:total,status:'待确认',time:Date.now(),paidAt:null,refundImg:M.refundImg||''});save();selN=[];selS=[];amtN='';amtS='';closeBox();toast('下单成功');go('my')}
@@ -122,7 +128,6 @@ function adm(){
   const sq=($('searchNo')?.value||'').trim();
   let list=O;
   if(sq){const sn=parseInt(sq);list=O.filter(o=>o.items.some(i=>i.no===sn))}
-  
   let h=`<div class="card"><div class="title">⚙️ 管理员后台（${M.acc}）</div>
     <div style="display:flex;justify-content:space-between"><span>订单数</span><b>${O.length}</b></div>
     <div style="display:flex;justify-content:space-between"><span>总额</span><b style="color:#e74c3c">¥${O.reduce((s,o)=>s+o.price,0).toFixed(2)}</b></div></div>
@@ -143,7 +148,6 @@ function adm(){
     <div style="display:flex;gap:6px"><input id="searchNo" placeholder="输入球号如2" value="${sq}"><button class="sm purple" onclick="adm()">搜索</button>${sq?`<button class="sm gray" onclick="$('searchNo').value='';adm()">清空</button>`:''}</div>
     ${sq?`<div class="small">🔍 ${sq}号订单共 ${list.length} 笔</div>`:''}</div>
   <div class="card"><div class="title">📋 全部订单（${sq?list.length:O.length}）</div>`;
-  
   list.forEach(o=>{
     const detailOpen=_openDetail===o.id;
     h+=`<div class="card" style="margin:8px 0">
